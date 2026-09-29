@@ -1,8 +1,11 @@
 # SmartCart
 
 Frontend: ReactJS
+
 Backend : NodeJS
+
 Development Machines: Local
+
 Database: MySQL
 
 Use the application with the following steps:
