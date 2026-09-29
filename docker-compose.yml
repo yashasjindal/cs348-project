@@ -4,7 +4,7 @@ services:
     container_name: smartcart_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: secret_password
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # Allows empty password
       MYSQL_DATABASE: grocery_prices
     command: --local-infile=1
     ports:
