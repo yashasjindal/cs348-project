@@ -1,0 +1,18 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: smartcart_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret_password
+      MYSQL_DATABASE: grocery_prices
+    command: --local-infile=1
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      # Maps local project folder into a secure sandbox path inside Docker
+      - .:/var/lib/mysql-files/
+
+volumes:
+  db_data:
