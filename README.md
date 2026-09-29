@@ -1,8 +1,6 @@
 # GroBud
 
-Before creating and loading the database, the dataset for grocery prices need to be scraped using Selenium from: https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810024501.
-
-After completing the preliminary steps above, we can use the application with the following steps:
+Use the application with the following steps:
 
 1. Start the MySQL Docker container: docker compose up -d
 
