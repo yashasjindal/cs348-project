@@ -5,7 +5,7 @@ USE grocery_prices;
 CREATE TABLE grocery_price_data (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     price_date DATE NOT NULL,
-    georgraphy VARCHAR(255) NOT NULL,
+    geography VARCHAR(255) NOT NULL,
     item VARCHAR(255) NOT NULL,
     unit VARCHAR(100),
     price_cad DECIMAL(10, 2),
