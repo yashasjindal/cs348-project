@@ -1,5 +1,17 @@
 # cs348-project
 
+SmartCart, a grocery budgeting web app for CS 348 (Fall 2026). The milestone reports are submitted on Learn; this repo holds the code.
+
+## Repository layout
+
+The repo is organised by component rather than by milestone: each milestone builds on the same database and app.
+
+| Folder | Contents |
+|---|---|
+| `db/` | MySQL schema, sample data, reset script, and the feature queries with their output (`test-sample.sql`, `test-sample.out`) |
+| `backend/` | Node.js API server (Express + mysql2) |
+| `frontend/` | Web interface (React + Vite 6) |
+
 ## Database setup (local MySQL)
 
 Requires MySQL 8.0 or newer. We develop on MySQL 9.7 LTS.
