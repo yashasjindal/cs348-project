@@ -68,7 +68,7 @@ cp .env.example .env    # database connection settings; edit if yours differ
 npm start               # or `npm run dev` to restart on file changes
 ```
 
-Check it with `curl localhost:3001/api/health`, which should print `{"status":"ok","products":8}`.
+Check it with `curl localhost:3001/api/health`, which should print `{"status":"ok","products":5}`.
 
 ### Frontend (React + Vite 6, port 5173)
 
@@ -89,7 +89,7 @@ Open http://localhost:5173. The Vite dev server forwards `/api` requests to the 
 | 1. Search and filter groceries by name, brand and category | `backend/src/routes/products.js`, `Search` in `frontend/src/App.jsx` | `GET /api/products?q=&brand=&category=` |
 | 2. Shopping basket: add/remove products, change quantities, see the estimated total at a chosen retailer | `backend/src/routes/basket.js`, `Basket` in `frontend/src/App.jsx` | `POST /api/basket/quote` |
 
-Supporting endpoints: `GET /api/products/filters` (brand and category lists), `GET /api/retailers`, `GET /api/health`.
+Supporting endpoints: `GET /api/products/filters` (brand and category lists), `GET /api/vendors`, `GET /api/health`.
 
 E/R Diagram:
 

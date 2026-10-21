@@ -21,10 +21,10 @@ router.get('/', async (req, res) => {
 
   const [rows] = await pool.execute(
     `SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category,
-            r.vid, r.name AS retailer, s.price
+            v.vid, v.name AS vendor, s.price
      FROM Product p
      JOIN Sells s ON s.pid = p.pid
-     JOIN Retailer r ON r.vid = s.vid
+     JOIN Vendor v ON v.vid = s.vid
      WHERE p.name LIKE CONCAT('%', ?, '%')
        AND (? IS NULL OR p.brand = ?)
        AND (? IS NULL OR p.category = ?)

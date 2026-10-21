@@ -12,8 +12,8 @@ app.get('/api/health', async (req, res) => {
   res.json({ status: 'ok', products: row.products });
 });
 
-app.get('/api/retailers', async (req, res) => {
-  const [rows] = await pool.execute('SELECT vid, name FROM Retailer ORDER BY name');
+app.get('/api/vendors', async (req, res) => {
+  const [rows] = await pool.execute('SELECT vid, name FROM Vendor ORDER BY name');
   res.json(rows);
 });
 

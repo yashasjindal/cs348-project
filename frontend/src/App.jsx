@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getFilters, getRetailers, quoteBasket, searchProducts } from './api.js';
+import { getFilters, getVendors, quoteBasket, searchProducts } from './api.js';
 
 const money = (n) => `$${n.toFixed(2)}`;
 
@@ -82,7 +82,7 @@ function Search({ onAdd }) {
                 {r.quantity} {r.unit}
               </td>
               <td>{r.category}</td>
-              <td>{r.retailer}</td>
+              <td>{r.vendor}</td>
               <td className="num">{money(r.price)}</td>
               <td>
                 <button type="button" onClick={() => onAdd(r)}>
@@ -105,21 +105,21 @@ function Search({ onAdd }) {
 }
 
 function Basket({ items, setItems }) {
-  const [retailers, setRetailers] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [vid, setVid] = useState(null);
   const [quote, setQuote] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    getRetailers()
+    getVendors()
       .then((rows) => {
-        setRetailers(rows);
+        setVendors(rows);
         if (rows.length) setVid(rows[0].vid);
       })
       .catch((e) => setError(e.message));
   }, []);
 
-  // Re-price the basket whenever its contents or the chosen retailer change.
+  // Re-price the basket whenever its contents or the chosen vendor change.
   useEffect(() => {
     if (!vid || items.length === 0) {
       setQuote(null);
@@ -149,9 +149,9 @@ function Basket({ items, setItems }) {
       <label className="controls">
         Price at
         <select value={vid ?? ''} onChange={(e) => setVid(Number(e.target.value))}>
-          {retailers.map((r) => (
-            <option key={r.vid} value={r.vid}>
-              {r.name}
+          {vendors.map((v) => (
+            <option key={v.vid} value={v.vid}>
+              {v.name}
             </option>
           ))}
         </select>
@@ -213,7 +213,7 @@ function Basket({ items, setItems }) {
 }
 
 export default function App() {
-  // Basket items: { pid, name, quantity }. A product is listed once however many retailers sell it.
+  // Basket items: { pid, name, quantity }. A product is listed once however many vendors sell it.
   const [items, setItems] = useState([]);
 
   const add = (product) =>

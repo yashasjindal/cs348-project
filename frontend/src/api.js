@@ -14,7 +14,7 @@ export function searchProducts({ q, brand, category }) {
 
 export const getFilters = () => request('/api/products/filters');
 
-export const getRetailers = () => request('/api/retailers');
+export const getVendors = () => request('/api/vendors');
 
 export function quoteBasket(vid, items) {
   return request('/api/basket/quote', {

@@ -6,7 +6,7 @@ const router = Router();
 const MAX_ITEMS = 100;
 const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
 
-// Feature 2: price a shopping basket at one retailer.
+// Feature 2: price a shopping basket at one vendor.
 // POST /api/basket/quote   body: { "vid": 1, "items": [{ "pid": 101, "quantity": 2 }, ...] }
 router.post('/quote', async (req, res) => {
   const { vid, items } = req.body ?? {};
@@ -47,7 +47,7 @@ router.post('/quote', async (req, res) => {
     [...params, vid],
   );
 
-  // Items the retailer doesn't sell drop out of the join; report them instead of hiding them.
+  // Items the vendor doesn't sell drop out of the join; report them instead of hiding them.
   const priced = new Set(lines.map((l) => l.pid));
   const unavailable = items.filter((i) => !priced.has(i.pid)).map((i) => i.pid);
   const total = Math.round(lines.reduce((sum, l) => sum + l.subtotal, 0) * 100) / 100;
