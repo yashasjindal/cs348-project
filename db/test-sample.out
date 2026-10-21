@@ -1,0 +1,90 @@
+--------------
+SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category, s.price
+FROM Product p, Sells s
+WHERE p.pid = s.pid AND p.name LIKE '%milk%'
+ORDER BY p.name
+--------------
+
++-----+-------------------------+-----------+----------+------+----------+-------+
+| pid | name                    | brand     | quantity | unit | category | price |
++-----+-------------------------+-----------+----------+------+----------+-------+
+| 101 | Lactantia 2% Milk       | Lactantia |    2.000 | L    | Dairy    |  5.29 |
+| 101 | Lactantia 2% Milk       | Lactantia |    2.000 | L    | Dairy    |  5.49 |
+| 101 | Lactantia 2% Milk       | Lactantia |    2.000 | L    | Dairy    |  5.99 |
+| 108 | Natrel Homogenized Milk | Natrel    |    4.000 | L    | Dairy    |  7.47 |
+| 108 | Natrel Homogenized Milk | Natrel    |    4.000 | L    | Dairy    |  8.29 |
++-----+-------------------------+-----------+----------+------+----------+-------+
+5 rows in set (0.000 sec)
+
+--------------
+WITH BasketItems AS (
+    SELECT 101 AS pid, 1 AS cart_quantity
+    UNION
+    SELECT 102, 2
+    UNION
+    SELECT 103, 1
+)
+SELECT p.name, b.cart_quantity, s.price AS unit_price, b.cart_quantity * s.price AS subtotal
+FROM BasketItems b JOIN Product p ON b.pid = p.pid JOIN Sells s ON p.pid = s.pid
+WHERE s.vid = 1
+--------------
+
++-------------------+---------------+------------+----------+
+| name              | cart_quantity | unit_price | subtotal |
++-------------------+---------------+------------+----------+
+| Lactantia 2% Milk |             1 |       5.29 |     5.29 |
+| Large Eggs        |             2 |       4.29 |     8.58 |
+| White Bread       |             1 |       3.19 |     3.19 |
++-------------------+---------------+------------+----------+
+3 rows in set (0.000 sec)
+
+--------------
+WITH BasketItems AS (
+    SELECT 101 AS pid, 1 AS cart_quantity
+    UNION
+    SELECT 102, 1
+    UNION
+    SELECT 103, 1
+)
+SELECT p.name, b.cart_quantity, s.price AS unit_price, b.cart_quantity * s.price AS subtotal,
+       sc.price AS benchmark_price, b.cart_quantity * sc.price AS benchmark_subtotal
+FROM BasketItems b JOIN Product p ON b.pid = p.pid JOIN Sells s ON p.pid = s.pid
+     LEFT JOIN StatCan sc ON p.sid = sc.sid
+WHERE s.vid = 1
+--------------
+
++-------------------+---------------+------------+----------+-----------------+--------------------+
+| name              | cart_quantity | unit_price | subtotal | benchmark_price | benchmark_subtotal |
++-------------------+---------------+------------+----------+-----------------+--------------------+
+| Lactantia 2% Milk |             1 |       5.29 |     5.29 |            5.50 |               5.50 |
+| Large Eggs        |             1 |       4.29 |     4.29 |            4.50 |               4.50 |
+| White Bread       |             1 |       3.19 |     3.19 |            3.95 |               3.95 |
++-------------------+---------------+------------+----------+-----------------+--------------------+
+3 rows in set (0.000 sec)
+
+--------------
+WITH BasketItems AS (
+    SELECT 101 AS pid, 1 AS cart_quantity
+    UNION
+    SELECT 102, 1
+    UNION
+    SELECT 103, 1
+)
+SELECT v.name AS retailer, SUM(b.cart_quantity * s.price) AS total_cost
+FROM BasketItems b, Sells s, Retailer v
+WHERE b.pid = s.pid AND s.vid = v.vid
+GROUP BY v.vid, v.name
+HAVING COUNT(DISTINCT b.pid) = (SELECT COUNT(DISTINCT pid) FROM BasketItems)
+ORDER BY total_cost ASC
+--------------
+
++-----------+------------+
+| retailer  | total_cost |
++-----------+------------+
+| Walmart   |      12.77 |
+| No Frills |      12.97 |
+| Sobeys    |      14.47 |
++-----------+------------+
+3 rows in set (0.000 sec)
+
+Bye
