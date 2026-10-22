@@ -25,7 +25,7 @@ mysql -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" -t -e "
     SELECT 'StatCan' AS tbl, COUNT(*) AS \`rows\` FROM StatCan
     UNION ALL SELECT 'StatCanPriceHistory', COUNT(*) FROM StatCanPriceHistory
     UNION ALL SELECT 'Product', COUNT(*) FROM Product
-    UNION ALL SELECT 'Retailer', COUNT(*) FROM Retailer
+    UNION ALL SELECT 'Vendor', COUNT(*) FROM Vendor
     UNION ALL SELECT 'Sells', COUNT(*) FROM Sells
     UNION ALL SELECT 'PriceHistory', COUNT(*) FROM PriceHistory;"
 echo "Done."

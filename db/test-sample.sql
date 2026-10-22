@@ -43,7 +43,7 @@ WITH BasketItems AS (
     SELECT 103, 1
 )
 SELECT v.name AS retailer, SUM(b.cart_quantity * s.price) AS total_cost
-FROM BasketItems b, Sells s, Retailer v
+FROM BasketItems b, Sells s, Vendor v
 WHERE b.pid = s.pid AND s.vid = v.vid
 GROUP BY v.vid, v.name
 HAVING COUNT(DISTINCT b.pid) = (SELECT COUNT(DISTINCT pid) FROM BasketItems)

@@ -1,5 +1,17 @@
 # cs348-project
 
+SmartCart, a grocery budgeting web app for CS 348 (Fall 2026). The milestone reports are submitted on Learn; this repo holds the code.
+
+## Repository layout
+
+The repo is organised by component rather than by milestone: each milestone builds on the same database and app.
+
+| Folder | Contents |
+|---|---|
+| `db/` | MySQL schema, sample data, reset script, and the feature queries with their output (`test-sample.sql`, `test-sample.out`) |
+| `backend/` | Node.js API server (Express + mysql2) |
+| `frontend/` | Web interface (React + Vite 6) |
+
 ## Database setup (local MySQL)
 
 Requires MySQL 8.0 or newer. We develop on MySQL 9.7 LTS.
@@ -54,6 +66,42 @@ MYSQL_PWD=smartcart_dev mysql -u smartcart smartcart -t -vvv --skip-comments < d
 ```
 
 To poke around: `mysql -u smartcart -p smartcart` (password `smartcart_dev`).
+
+## Running the application
+
+Requires Node.js 20 or newer, and the database from the steps above.
+
+### Backend (Express + mysql2, port 3001)
+
+```bash
+cd backend
+npm install
+cp .env.example .env    # database connection settings; edit if yours differ
+npm start               # or `npm run dev` to restart on file changes
+```
+
+Check it with `curl localhost:3001/api/health`, which should print `{"status":"ok","products":5}`.
+
+### Frontend (React + Vite 6, port 5173)
+
+In a second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. The Vite dev server forwards `/api` requests to the backend, so start the backend first.
+
+### Features currently supported
+
+| Feature | Where | API |
+|---|---|---|
+| 1. Search and filter groceries by name, brand and category | `backend/src/routes/products.js`, `Search` in `frontend/src/App.jsx` | `GET /api/products?q=&brand=&category=` |
+| 2. Shopping basket: add/remove products, change quantities, see the estimated total at a chosen retailer | `backend/src/routes/basket.js`, `Basket` in `frontend/src/App.jsx` | `POST /api/basket/quote` |
+
+Supporting endpoints: `GET /api/products/filters` (brand and category lists), `GET /api/vendors`, `GET /api/health`.
 
 E/R Diagram:
 
