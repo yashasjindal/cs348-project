@@ -25,6 +25,16 @@ brew install mysql@9.7
 brew services start mysql@9.7
 mysql_secure_installation   # answer "no" to VALIDATE PASSWORD, then set a root password
 ```
+Windows:
+
+On https://dev.mysql.com/downloads/mysql/:
+1. Select Version: `9.7.4 LTS` and Select Operating System: `Microsoft Windows`
+2. Download the Windows MSI Installer
+3. In the wizard, when you get to the `Choose Setup Type` step, select `Typical`
+4. Install
+5. Once you are in the MySQL Server Configurator, proceed with the default options for `Data Directory` and `Type and Networking`
+6. At the `Accounts and Roles` step, set a root password
+7. Continue with defaults for the rest of the steps
 
 On other platforms, install MySQL Community Server from https://dev.mysql.com/downloads/mysql/.
 
@@ -45,6 +55,24 @@ EXIT;
 
 ```bash
 ./db/reset.sh
+```
+
+Successful output:
+```
+Recreating database smartcart...
+Creating tables...
+Loading sample data...
++---------------------+------+
+| tbl                 | rows |
++---------------------+------+
+| StatCan             |    5 |
+| StatCanPriceHistory |   11 |
+| Product             |    5 |
+| Vendor              |    3 |
+| Sells               |   12 |
+| PriceHistory        |    9 |
++---------------------+------+
+Done.
 ```
 
 This drops and recreates every table, then loads the toy dataset. Run it again any time to get back to a clean state.
@@ -105,5 +133,4 @@ Supporting endpoints: `GET /api/products/filters` (brand and category lists), `G
 
 E/R Diagram:
 
-
-![Uploading image.png…]()
+![alt text](ER.png)
