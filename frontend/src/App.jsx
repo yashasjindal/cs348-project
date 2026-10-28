@@ -225,7 +225,6 @@ export default function App() {
 
   return (
     <main>
-      <h1>SmartCart</h1>
       <Search onAdd={add} />
       <Basket items={items} setItems={setItems} />
     </main>

@@ -133,4 +133,4 @@ Supporting endpoints: `GET /api/products/filters` (brand and category lists), `G
 
 E/R Diagram:
 
-![alt text](ER.png)
+![E/R diagram](ER.png)

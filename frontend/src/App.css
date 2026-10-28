@@ -1,7 +1,8 @@
 :root {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: #1f2328;
-  background: #ffffff;
+  background: #F3EAD5;
+  margin: 24px 48px;
 }
 
 main {
@@ -12,6 +13,9 @@ main {
 
 h1 {
   margin: 0 0 8px;
+  font-family: 'VT323', monospace;
+  color: #203C34;
+  font-weight: 400;
 }
 
 section {
