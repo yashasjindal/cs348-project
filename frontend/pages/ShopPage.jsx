@@ -10,9 +10,9 @@ function ShopPage() {
 
             {/* TODO: make this dynamic to update based on the step we're on */}
             <nav className="shop-nav">
-                <Button text="01 SHOP" disabled={true} color="#203C34" />
-                <Button text="02 RECEIPT" disabled={true} color="transparent" text_color="#607266" />
-                <Button text="03 COMPARE" disabled={true} color="transparent" text_color="#607266" />
+                <Button text="01 SHOP" disabled={true} type="currentPage" />
+                <Button text="02 RECEIPT" disabled={true} type="notCurrentPage" />
+                <Button text="03 COMPARE" disabled={true} type="notCurrentPage" />
             </nav>
         </header>
       <h1>Shop Page</h1>
