@@ -2,3 +2,13 @@
     padding: 11.5px 67.5px;
     font-weight: 500
 }
+
+.custom-button.currentPage {
+  background-color: #203C34;
+  color: #FFFCF2;
+}
+
+.custom-button.notCurrentPage {
+  background-color: transparent;
+  color: #607266;
+}
