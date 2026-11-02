@@ -1,6 +1,6 @@
 import React from 'react'
 import './ShopPage.css'
-import Button from '../components/button/Button'
+import Button from '../../components/button/Button'
 
 function ShopPage() {
   return (
