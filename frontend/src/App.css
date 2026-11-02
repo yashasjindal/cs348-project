@@ -19,6 +19,12 @@ h1 {
   font-size: 36px;
 }
 
+h2 {
+  font-weight: 700;
+  color: #607266;
+  font-size: 14px;
+}
+
 section {
   margin-top: 32px;
 }
