@@ -1,8 +1,27 @@
 import React from 'react'
 import './ShopPage.css'
+import { useEffect, useState } from 'react';
+import { getFilters, getVendors, quoteBasket, searchProducts } from '../api.js';
 import Button from '../components/button/Button.jsx'
+import ProductCard from '../components/product_card/ProductCard.jsx'
 
 function ShopPage() {
+  const [q, setQ] = useState('');
+  const [brand, setBrand] = useState('');
+  const [category, setCategory] = useState('');
+  const [results, setResults] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let current = true;
+    searchProducts({ q, brand, category })
+      .then((rows) => current && (setResults(rows), setError('')))
+      .catch((e) => current && setError(e.message));
+    return () => {
+      current = false;
+    };
+  }, [q, brand, category]);
+
   return (
     <div className="shop-page">
       <header className="shop-header">
@@ -23,7 +42,14 @@ function ShopPage() {
       <div className="shop-terminal">
         <p className="shop-terminal-header">● SELF CHECKOUT</p>
         <div className="shop-content">
-          test
+          {results.map((r) => (
+            <ProductCard
+              brand={r.brand}
+              name={r.name}
+              size={`${r.quantity} ${r.unit}`}
+              price={r.price}
+            />
+          ))}
         </div>
         <p className="shop-subtitle">TYPE IT. BAG IT. COMPARE IT.</p>
       </div>

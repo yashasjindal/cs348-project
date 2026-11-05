@@ -49,13 +49,16 @@
 .shop-content {
   width: 1304;
   height: 630;
-  gap: 24;
   opacity: 1;
   border-radius: 12px;
   border-width: 2px;
-  padding: space/24;
+  padding: 16px;
   background: var(--color-paper, #FFFCF2);
-  border: 2px solid var(--color-ink, #203C34)
+  border: 2px solid var(--color-ink, #203C34);
+  display: grid;
+  grid-template-columns: repeat(2, 386px);
+  column-gap: 16px;
+  row-gap: 16px;
 }
 
 .shop-terminal-header {

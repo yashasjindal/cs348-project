@@ -8,6 +8,8 @@ function Button({ text, type, disabled = false, onClick }) {
     buttonStyle = 'currentPage';
   } else if (type === 'notCurrent') {
     buttonStyle = 'notCurrentPage';
+  } else if (type === 'add') {
+    buttonStyle = 'addButton';
   }
 
   return (
