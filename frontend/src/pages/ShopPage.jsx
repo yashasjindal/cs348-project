@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getFilters, getVendors, quoteBasket, searchProducts } from '../api.js';
 import Button from '../components/button/Button.jsx'
 import ProductCard from '../components/product_card/ProductCard.jsx'
+import BasketCard from '../components/basket_card/BasketCard.jsx'
 
 function ShopPage() {
   const [q, setQ] = useState('');
@@ -11,6 +12,10 @@ function ShopPage() {
   const [category, setCategory] = useState('');
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
+  const [items, setItems] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [vid, setVid] = useState(null);
+  const [quote, setQuote] = useState(null);
 
   useEffect(() => {
     let current = true;
@@ -21,6 +26,44 @@ function ShopPage() {
       current = false;
     };
   }, [q, brand, category]);
+
+  useEffect(() => {
+    getVendors()
+      .then((rows) => {
+        setVendors(rows);
+        if (rows.length) setVid(rows[0].vid);
+      })
+      .catch((e) => setError(e.message));
+  }, []);
+
+  useEffect(() => {
+    if (!vid || items.length === 0) {
+      setQuote(null);
+      return;
+    }
+    let current = true;
+    quoteBasket(
+      vid,
+      items.map(({ pid, quantity }) => ({ pid, quantity })),
+    )
+      .then((q) => current && (setQuote(q), setError('')))
+      .catch((e) => current && setError(e.message));
+    return () => {
+      current = false;
+    };
+  }, [vid, items]);
+
+  const add = (product) =>
+    setItems((prev) =>
+      prev.some((i) => i.pid === product.pid)
+        ? prev.map((i) => (i.pid === product.pid ? { ...i, quantity: i.quantity + 1 } : i))
+        : [...prev, { pid: product.pid, name: product.name, quantity: 1, size: product.quantity, unit: product.unit }],
+    );
+  
+  const setQuantity = (pid, quantity) =>
+    setItems((prev) => prev.map((i) => (i.pid === pid ? { ...i, quantity } : i)));
+
+  const remove = (pid) => setItems((prev) => prev.filter((i) => i.pid !== pid));
 
   return (
     <div className="shop-page">
@@ -42,14 +85,33 @@ function ShopPage() {
       <div className="shop-terminal">
         <p className="shop-terminal-header">● SELF CHECKOUT</p>
         <div className="shop-content">
-          {results.map((r) => (
-            <ProductCard
-              brand={r.brand}
-              name={r.name}
-              size={`${r.quantity} ${r.unit}`}
-              price={r.price}
+          <div className="shop-content-header">
+            <h1>What's on your list?</h1>
+            <h2>01 / FIND YOUR ITEMS</h2>
+          </div>
+          <div className="products">
+            {results.map((r) => (
+              <ProductCard
+                key={r.pid}
+                brand={r.brand}
+                name={r.name}
+                size={`${r.quantity} ${r.unit}`}
+                price={r.price}
+                onClick={() => add(r)}
+              />
+            ))}
+          </div>
+          <div className="basket">
+            <BasketCard 
+              items={items}
+              onSetQuantity={setQuantity}
+              onRemove={remove}
+              vendors={vendors}
+              vid={vid}
+              setVid={setVid}
+              quote={quote}
             />
-          ))}
+          </div>
         </div>
         <p className="shop-subtitle">TYPE IT. BAG IT. COMPARE IT.</p>
       </div>

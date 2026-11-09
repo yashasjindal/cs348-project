@@ -10,6 +10,10 @@ function Button({ text, type, disabled = false, onClick }) {
     buttonStyle = 'notCurrentPage';
   } else if (type === 'add') {
     buttonStyle = 'addButton';
+  } else if (type === 'primary') {
+    buttonStyle = 'primaryButton';
+  } else if (type === 'symbol') {
+    buttonStyle = 'symbolButton'
   }
 
   return (

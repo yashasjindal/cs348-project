@@ -2,11 +2,7 @@ import React from 'react'
 import './ProductCard.css'
 import Button from '../button/Button.jsx'
 
-function ProductCard({ brand, name, size, price }) {
-    const onClick = () => {
-        console.log('Add button clicked for product:', name);
-    }
-
+function ProductCard({ brand, name, size, price, onClick }) {
   return (
     <div className="product-card">
         <div className="product-content">

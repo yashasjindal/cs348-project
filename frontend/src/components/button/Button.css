@@ -5,6 +5,11 @@
     font-weight: 500;
 }
 
+.custom-button:hover {
+    background-color: #203C34;
+    color: #FFFCF2;
+}
+
 .custom-button.currentPage {
   background-color: #203C34;
 }
@@ -33,4 +38,21 @@
 .custom-button.addButton:hover {
   background: var(--color-ink, #203C34);
   color: var(--color-paper, #FFFCF2);
+}
+
+.custom-button.primaryButton {
+  width: 100%
+}
+
+.custom-button.symbolButton {
+    background: var(--color-paper, #FFFCF2);
+    border: 2px solid var(--color-ink, #203C34);
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    flex: 0 0 32px;
+    padding: 0;
+    border-radius: 8px;
+    color: #203C34;
 }
