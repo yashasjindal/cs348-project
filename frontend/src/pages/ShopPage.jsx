@@ -1,17 +1,14 @@
 import React from 'react'
 import './ShopPage.css'
 import { useEffect, useState } from 'react';
-import { getFilters, getVendors, quoteBasket, searchProducts } from '../api.js';
+import { getVendors, quoteBasket } from '../api.js';
 import Button from '../components/button/Button.jsx'
 import ProductCard from '../components/product_card/ProductCard.jsx'
 import BasketCard from '../components/basket_card/BasketCard.jsx'
+import SearchBar from '../components/search_bar/SearchBar.jsx';
 
 function ShopPage() {
-  const [q, setQ] = useState('');
-  const [brand, setBrand] = useState('');
-  const [category, setCategory] = useState('');
   const [results, setResults] = useState([]);
-  const [error, setError] = useState('');
   const [items, setItems] = useState(() => {
   const savedBasket = localStorage.getItem('basket');
     return savedBasket ? JSON.parse(savedBasket) : [];
@@ -19,16 +16,6 @@ function ShopPage() {
   const [vendors, setVendors] = useState([]);
   const [vid, setVid] = useState(null);
   const [quote, setQuote] = useState(null);
-
-  useEffect(() => {
-    let current = true;
-    searchProducts({ q, brand, category })
-      .then((rows) => current && (setResults(rows), setError('')))
-      .catch((e) => current && setError(e.message));
-    return () => {
-      current = false;
-    };
-  }, [q, brand, category]);
 
   useEffect(() => {
     getVendors()
@@ -96,17 +83,27 @@ function ShopPage() {
             <h1>What's on your list?</h1>
             <h2>01 / FIND YOUR ITEMS</h2>
           </div>
-          <div className="products">
-            {results.map((r) => (
-              <ProductCard
-                key={r.pid}
-                brand={r.brand}
-                name={r.name}
-                size={`${r.quantity} ${r.unit}`}
-                price={r.price}
-                onClick={() => add(r)}
-              />
-            ))}
+          <SearchBar  onResults={setResults}/>
+          <div className="results">
+            {results.length === 0 ? (
+              <div className="no-products">
+                <h1>Start with one thing.</h1>
+                <h2>Milk, eggs, bread… find the exact brand and size you’d put in your real basket.</h2>
+              </div>
+            ) : (
+              <div className="products">
+                {results.map((r) => (
+                <ProductCard
+                  key={r.pid}
+                  brand={r.brand}
+                  name={r.name}
+                  size={`${r.quantity} ${r.unit}`}
+                  price={r.price}
+                  onClick={() => add(r)}
+                />
+              ))}
+              </div>
+            )}
           </div>
           <div className="basket">
             <BasketCard 
