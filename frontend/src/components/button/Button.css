@@ -1,0 +1,58 @@
+.custom-button {
+    background-color: #28734F;
+    color: #FFFCF2;
+    padding: 11.5px 67.5px;
+    font-weight: 500;
+}
+
+.custom-button:hover {
+    background-color: #203C34;
+    color: #FFFCF2;
+}
+
+.custom-button.currentPage {
+  background-color: #203C34;
+}
+
+.custom-button.notCurrentPage {
+  background-color: transparent;
+  color: #607266;
+}
+
+.custom-button.addButton {
+  width: 150;
+  height: 48;
+  border-radius: 8px;
+  border-width: 2px;
+  opacity: 1;
+  background: var(--color-paper, #FFFCF2);
+  border: 2px solid var(--color-ink, #203C34);
+  color: #203C34;
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 16px;
+  line-height: 120%;
+  letter-spacing: 0%;
+}
+
+.custom-button.addButton:hover {
+  background: var(--color-ink, #203C34);
+  color: var(--color-paper, #FFFCF2);
+}
+
+.custom-button.primaryButton {
+  width: 100%
+}
+
+.custom-button.symbolButton {
+    background: var(--color-paper, #FFFCF2);
+    border: 2px solid var(--color-ink, #203C34);
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    flex: 0 0 32px;
+    padding: 0;
+    border-radius: 8px;
+    color: #203C34;
+}
