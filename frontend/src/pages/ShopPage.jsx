@@ -12,7 +12,10 @@ function ShopPage() {
   const [category, setCategory] = useState('');
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(() => {
+  const savedBasket = localStorage.getItem('basket');
+    return savedBasket ? JSON.parse(savedBasket) : [];
+  });
   const [vendors, setVendors] = useState([]);
   const [vid, setVid] = useState(null);
   const [quote, setQuote] = useState(null);
@@ -52,6 +55,10 @@ function ShopPage() {
       current = false;
     };
   }, [vid, items]);
+
+  useEffect(() => {
+    localStorage.setItem('basket', JSON.stringify(items));
+  }, [items]);
 
   const add = (product) =>
     setItems((prev) =>
