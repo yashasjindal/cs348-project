@@ -14,6 +14,8 @@ function Button({ text, type, disabled = false, onClick }) {
     buttonStyle = 'primaryButton';
   } else if (type === 'symbol') {
     buttonStyle = 'symbolButton'
+  } else if (type === 'search') {
+    buttonStyle = 'searchButton'
   }
 
   return (
