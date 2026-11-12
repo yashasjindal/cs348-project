@@ -160,6 +160,107 @@ function ComparisonPage() {
                     );
                 })}
             </section>
+
+            {/* Product price comparison table */}
+            <section className="comparison-panel">
+                <div className="comparison-table-heading">
+                    <h2>Where each item wins</h2>
+                    <p>LOWEST PRICE HIGHLIGHTED · CAD</p>
+                </div>
+                <div className="comparison-table-wrapper">
+                    <table className="comparison-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">PRODUCT / PACK SIZE</th>
+
+                                {storeTotals.map((store) => (
+                                    <th scope="col" key={store.vid}>
+                                        {store.retailer}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {products.map((product) => (
+                                <tr key={product.pid}>
+                                    <th scope="row">
+                                        {product.name} · {product.packSize} × {product.quantity}
+                                    </th>
+
+                                    {storeTotals.map((store) => {
+                                        // Find this retailer's price for this product
+                                        const entry = product.prices.find(
+                                            (price) => price.vid === store.vid,
+                                        );
+
+                                        const hasPrice = Number.isFinite(entry?.price);
+                                        const isCheapestProduct =
+                                            hasPrice && product.cheapestVendorIds.includes(store.vid);
+
+                                        return (
+                                            <td
+                                                key={store.vid}
+                                                className={isCheapestProduct ? 'comparison-lowest' : ''}
+                                            >
+                                                {hasPrice ? money(entry.price) : 'Unavailable'}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+
+                        <tfoot>
+                            <tr>
+                                <th scope="row">BASKET TOTAL</th>
+
+                                {storeTotals.map((store) => {
+                                    const isComplete =
+                                        store.hasAllItems && Number.isFinite(store.total);
+
+                                    const isCheapestBasket =
+                                        isComplete &&
+                                        lowestTotalCents !== null &&
+                                        Math.round(store.total * 100) === lowestTotalCents;
+
+                                    return (
+                                        <td
+                                            key={store.vid}
+                                            className={isCheapestBasket ? 'comparison-lowest' : ''}
+                                        >
+                                            {isComplete ? money(store.total) : 'Incomplete'}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+
+            {/* Action buttons */}
+            <div className="comparison-actions">
+                <button type="button" disabled>
+                    ← Back to my receipt
+                </button>
+                <Link to="/shop">Edit my basket →</Link>
+            </div>
+
+            {/* Footer */}
+            <footer className="comparison-footer">
+                <p>
+                    Illustrative prices · Matched pack sizes ·
+                    No loyalty offers or delivery fees included.
+                    <br />
+                    Prices are estimates for comparison, not a completed purchase.
+                </p>
+
+                <div>
+                    <span>A LITTLE LESS SPENDING. A LITTLE MORE KNOWING.</span>
+                    <span>SAMPLE PRICES / CAD / NOT A PURCHASE</span>
+                </div>
+            </footer>
         </div>
     );
 }
