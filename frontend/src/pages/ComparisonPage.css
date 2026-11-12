@@ -1,0 +1,106 @@
+.comparison-page {
+  --ink: var(--color-ink, #203c34);
+  --paper: var(--color-paper, #fffcf2);
+  --green: #28734f;
+  --pale-green: #e4edda;
+  --yellow: #f6ce65;
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.comparison-page,
+.comparison-page * {
+  box-sizing: border-box;
+}
+
+.comparison-page h1,
+.comparison-page h2,
+.comparison-page h3,
+.comparison-page p {
+  margin: 0;
+}
+
+/* Header */
+.comparison-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.comparison-banner h2 {
+  color: var(--paper, #FFFCF2);
+  font-family: 'VT323', monospace;
+  font-weight: 400;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.comparison-nav {
+  display: flex;
+  gap: 12px;
+}
+
+/* Banner */
+.comparison-banner {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  align-items: center;
+  gap: 32px;
+  padding: 24px;
+  border-radius: 8px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.comparison-page .comparison-label {
+  margin-bottom: 12px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.comparison-banner .comparison-label {
+  color: var(--yellow);
+}
+
+.comparison-banner p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.comparison-winner {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.comparison-winner strong {
+  color: var(--yellow);
+  font-size: 28px;
+}
+
+/* Retailer cards */
+.comparison-retailers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.comparison-card {
+  padding: 18px;
+  border: 1px solid #c9d1bc;
+  border-radius: 6px;
+  background: var(--paper);
+}
+
+.comparison-card-best {
+  background: var(--pale-green);
+  border-color: var(--green);
+}
