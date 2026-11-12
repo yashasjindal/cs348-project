@@ -1,13 +1,16 @@
 import React from 'react'
 import './ShopPage.css'
-import { useEffect, useState } from 'react';
-import { getVendors, quoteBasket } from '../api.js';
+import { useEffect, useState, useRef } from 'react';
+import { getVendors, quoteBasket, searchProducts } from '../api.js';
 import Button from '../components/button/Button.jsx'
 import ProductCard from '../components/product_card/ProductCard.jsx'
 import BasketCard from '../components/basket_card/BasketCard.jsx'
 import SearchBar from '../components/search_bar/SearchBar.jsx';
+import Filter from '../components/filter/Filter.jsx';
 
 function ShopPage() {
+  const [q, setQ] = useState('');
+  const [error, setError] = useState('');
   const [results, setResults] = useState([]);
   const [items, setItems] = useState(() => {
   const savedBasket = localStorage.getItem('basket');
@@ -16,6 +19,55 @@ function ShopPage() {
   const [vendors, setVendors] = useState([]);
   const [vid, setVid] = useState(null);
   const [quote, setQuote] = useState(null);
+  const [brand, setBrand] = useState('');
+  const [category, setCategory] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const searchRequest = useRef(0);
+  const firstFilterRender = useRef(true);
+
+  const handleSearch = async () => {
+    const requestId = ++searchRequest.current;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const rows = await searchProducts({
+        q,
+        brand,
+        category
+      });
+
+      // Ignore an older request if a newer one has started
+      if (requestId !== searchRequest.current) return;
+
+      setResults(rows);
+      setHasSearched(true);
+
+    } catch (e) {
+      if (requestId !== searchRequest.current) return;
+
+      setError(e.message);
+      setResults([]);
+      setHasSearched(true);
+
+    } finally {
+      if (requestId === searchRequest.current) {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (firstFilterRender.current) {
+      firstFilterRender.current = false;
+      return;
+    }
+
+    handleSearch();
+  }, [brand, category]);
 
   useEffect(() => {
     getVendors()
@@ -83,12 +135,36 @@ function ShopPage() {
             <h1>What's on your list?</h1>
             <h2>01 / FIND YOUR ITEMS</h2>
           </div>
-          <SearchBar  onResults={setResults}/>
+          <SearchBar
+            q={q}
+            setQ={setQ}
+            onSearch={handleSearch}
+          />
+          <Filter 
+            brand={brand}
+            setBrand={setBrand}
+            category={category}
+            setCategory={setCategory}
+          />
           <div className="results">
-            {results.length === 0 ? (
+            {loading ? (
+              <div className="no-products">
+                <h1>Searching...</h1>
+              </div>
+            ) : !hasSearched ? (
               <div className="no-products">
                 <h1>Start with one thing.</h1>
-                <h2>Milk, eggs, bread… find the exact brand and size you’d put in your real basket.</h2>
+                <h2>
+                  Milk, eggs, bread… find the exact brand and size
+                  you’d put in your real basket.
+                </h2>
+              </div>
+            ) : results.length === 0 ? (
+              <div className="no-products">
+                <h1>No options found.</h1>
+                <h2>
+                  Try another search or adjust your filters.
+                </h2>
               </div>
             ) : (
               <div className="products">
