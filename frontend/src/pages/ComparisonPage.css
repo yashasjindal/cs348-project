@@ -7,7 +7,6 @@
 
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
   color: var(--ink);
   font-size: 14px;
 }
@@ -43,7 +42,12 @@
 
 .comparison-nav {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 12px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 /* Banner */
@@ -56,7 +60,6 @@
   border-radius: 8px;
   background: var(--ink);
   color: var(--paper);
-  margin-top: 0;
 }
 
 .comparison-page .comparison-label {
