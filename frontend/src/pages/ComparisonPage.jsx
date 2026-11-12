@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 
@@ -74,79 +75,92 @@ function ComparisonPage() {
         (store) => store.hasAllItems && Number.isFinite(store.total),
     );
 
-const lowestTotalCents = completeStores.length
-  ? Math.min(...completeStores.map((store) => Math.round(store.total * 100)))
-  : null;
+    const sortedStores = [...completeStores].sort((a, b) => a.total - b.total);
+
+    const cheapestStore = sortedStores[0];
+    
+    const mostExpensiveStore = sortedStores[sortedStores.length - 1];
+
+    const lowestTotalCents = cheapestStore ? Math.round(cheapestStore.total*100) : null;
+    
+    const difference = cheapestStore ? (Math.round(mostExpensiveStore.total*100) - lowestTotalCents) / 100 : null;
+
+    const cheapestNames = sortedStores.filter( (store) => Math.round(store.total * 100) === lowestTotalCents,).map((store) => store.retailer).join(' / ');
 
     return (
-    <div className="comparison-page">
-        <header className="comparison-header">
-            <h1 className="logo">SmartCart</h1>
-    
-            {/* TODO: make this dynamic to update based on the step we're on */}
-            <nav className="comparison-nav">
-                <Button text="01 SHOP" disabled={true} type="notCurrent" />
-                <Button text="02 RECEIPT" disabled={true} type="notCurrent" />
-                <Button text="03 COMPARE" disabled={true} type="current" />
-            </nav>
-        </header>
+        <div className="comparison-page">
+            <header className="comparison-header">
+                <h1 className="logo">SmartCart</h1>
 
-        {/* Dark green summary banner */}
-        <section className="comparison-banner">
-            <div>
-                <p className="comparison-label">THE BASKET BREAKDOWN</p>
-                <h2>Your groceries. Three price tags.</h2>
-                <p>Compare the same products and pack sizes, store by store.</p>
-            </div>
+                {/* TODO: make this dynamic to update based on the step we're on */}
+                <nav className="comparison-nav">
+                    <Button text="01 SHOP" disabled={true} type="notCurrent" />
+                    <Button text="02 RECEIPT" disabled={true} type="notCurrent" />
+                    <Button text="03 COMPARE" disabled={true} type="current" />
+                </nav>
+            </header>
 
-            <div>
-                <p className="comparison-label">LOWEST SINGLE-STORE TOTAL</p>
-                <div className="comparison-winner">
-                    <h2>Walmart</h2>
-                    <strong>$12.77</strong>
+            {/* Dark green summary banner */}
+            <section className="comparison-banner">
+                <div>
+                    <p className="comparison-label">THE BASKET BREAKDOWN</p>
+                    <h2>Your groceries. Three price tags.</h2>
+                    <p>Compare the same products and pack sizes, store by store.</p>
                 </div>
-                {/* hardcoded.... */}
-                <p>$1.70 less than Sobeys for this basket</p>
-            </div>
-        </section>
 
-        {/* Retailer total cards */}
-        <section className="comparison-retailers">
-            {storeTotals.map((store) => {
-                const difference = store.hasAllItems && lowestTotalCents !== null ? (Math.round(store.total * 100) - lowestTotalCents) / 100 : null;
-                const isCheapest = difference === 0;
-            
+                <div>
+                    <p className="comparison-label">LOWEST SINGLE-STORE TOTAL</p>
 
-                return ( 
-                    <article 
-                    key={store.vid}
-                    className={`comparison-card ${
-                        isCheapest ? 'comparison-card-best' : ''
-                    }`}
-                    >
-                        <div className="comparison-card-heading">
-                            <h3>{store.retailer}</h3> 
-                            <strong>
-                                {difference !== null ? money(store.total) : 'Incomplete'}
-                            </strong>
-                        </div>
-                        <p>
-                            {difference === null
-                            ? 'Some items are unavailable'
-                            : isCheapest
-                                ? 'LOWEST TOTAL'
-                                : `+${money(difference)} vs lowest`}
-                        </p>
-                    </article>
-                );
-            })}
-        </section>
+                    {cheapestStore ? (
+                        <>
+                            <div className="comparison-winner">
+                                <h2>{cheapestNames}</h2>
+                                <strong>{money(cheapestStore.total)}</strong>
+                            </div>
 
-        {/* Product price comparison table */}
-        <section className="comparison-table">
-            
-        </section>
-    </div>      
+                            <p>
+                                {sortedStores.length === 1 ? 'Only this retailer has every item in your basket.'
+                                    : difference === 0 ? 'All complete baskets have the same total.'
+                                        : `${money(difference)} less than ${mostExpensiveStore.retailer} for this basket`}
+                            </p>
+                        </>
+                    ) : (
+                        <p>No single retailer has every item in your basket.</p>
+                    )}
+                </div>
+            </section>
+
+            {/* Retailer total cards */}
+            <section className="comparison-retailers">
+                {storeTotals.map((store) => {
+                    const difference = store.hasAllItems && lowestTotalCents !== null ? (Math.round(store.total * 100) - lowestTotalCents) / 100 : null;
+                    const isCheapest = difference === 0;
+
+
+                    return (
+                        <article
+                            key={store.vid}
+                            className={`comparison-card ${isCheapest ? 'comparison-card-best' : ''
+                                }`}
+                        >
+                            <div className="comparison-card-heading">
+                                <h3>{store.retailer}</h3>
+                                <strong>
+                                    {difference !== null ? money(store.total) : 'Incomplete'}
+                                </strong>
+                            </div>
+                            <p>
+                                {difference === null
+                                    ? 'Some items are unavailable'
+                                    : isCheapest
+                                        ? 'LOWEST TOTAL'
+                                        : `+${money(difference)} vs lowest`}
+                            </p>
+                        </article>
+                    );
+                })}
+            </section>
+        </div>
     );
 }
 

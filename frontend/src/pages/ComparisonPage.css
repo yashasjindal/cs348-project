@@ -38,7 +38,7 @@
   font-family: 'VT323', monospace;
   font-weight: 400;
   margin-bottom: 10px;
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .comparison-nav {
@@ -83,6 +83,8 @@
 .comparison-winner strong {
   color: var(--yellow);
   font-size: 28px;
+  font-family: 'VT323', monospace;
+  font-weight: 400;
 }
 
 /* Retailer cards */
