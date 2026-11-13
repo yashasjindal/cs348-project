@@ -85,3 +85,23 @@
   background: var(--color-ink, #203C34);
   color: var(--color-yellow, #F6CA62);
 }
+
+.custom-button.clearButton {
+  width: 225px;
+  height: 42px;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.custom-button.clearButton:hover {
+  background: var(--color-ink, #203C34);
+  color: var(--color-paper, #FFFCF2);
+}
