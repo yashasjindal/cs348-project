@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '../components/button/Button.jsx';
-import './ShopPage.css';
+import './ComparisonPage.css';
 import './Receipt.css';
 
 function ReceiptPage() {
@@ -10,10 +10,10 @@ function ReceiptPage() {
   const quote = state?.quote;
 
   return (
-    <div className="receipt-page">
-      <header className="shop-header">
+    <div className="comparison-page receipt-page">
+      <header className="comparison-header">
         <h1 className="logo">SmartCart</h1>
-        <nav className="shop-nav">
+        <nav className="comparison-nav">
           <Button text="01 SHOP" disabled={true} type="notCurrent" />
           <Button text="02 RECEIPT" disabled={true} type="current" />
           <Button text="03 COMPARE" disabled={true} type="notCurrent" />
