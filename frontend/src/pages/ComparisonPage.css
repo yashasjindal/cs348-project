@@ -226,10 +226,10 @@
   text-decoration: none;
 }
 
-.comparison-actions button {
+.comparison-actions .comparison-back {
   background: var(--paper);
   color: var(--ink);
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 .comparison-actions a {

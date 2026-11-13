@@ -1,10 +1,11 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Button from '../components/button/Button.jsx';
 import './ShopPage.css';
 import './Receipt.css';
 
 function ReceiptPage() {
   const { state } = useLocation();
+  const navigate = useNavigate();
   const items = state?.items ?? [];
   const quote = state?.quote;
 
@@ -48,6 +49,13 @@ function ReceiptPage() {
           </>
         )}
 
+        <div className="receipt-compare-button">
+          <Button
+            text="Compare stores →"
+            type="primary"
+            onClick={() => navigate('/compare', { state })}
+          />
+        </div>
         <Link className="receipt-back" to="/shop">← Back to shop</Link>
       </main>
     </div>

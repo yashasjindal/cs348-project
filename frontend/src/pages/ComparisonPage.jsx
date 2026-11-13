@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 
@@ -70,6 +70,7 @@ const products = [
 const money = (value) => `$${value.toFixed(2)}`;
 
 function ComparisonPage() {
+    const { state } = useLocation();
 
     const completeStores = storeTotals.filter(
         (store) => store.hasAllItems && Number.isFinite(store.total),
@@ -241,9 +242,9 @@ function ComparisonPage() {
 
             {/* Action buttons */}
             <div className="comparison-actions">
-                <button type="button" disabled>
+                <Link to="/receipt" state={state} className="comparison-back">
                     ← Back to my receipt
-                </button>
+                </Link>
                 <Link to="/shop">Edit my basket →</Link>
             </div>
 

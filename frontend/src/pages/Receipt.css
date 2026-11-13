@@ -50,6 +50,12 @@
   margin: 24px 0;
 }
 
+.receipt-compare-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
 .receipt-back {
   display: inline-block;
   margin-top: 24px;
