@@ -1,75 +1,45 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
+import { compareBasket } from '../api.js';
 import { Link } from 'react-router-dom';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 
-// Temporary sample data for building the layout.
-const storeTotals = [
-  {
-        "vid": 1,
-        "retailer": "Walmart",
-        "total": 12.77,
-        "hasAllItems": true
-      },
-      {
-        "vid": 2,
-        "retailer": "No Frills",
-        "total": 12.97,
-        "hasAllItems": true
-      },
-      {
-        "vid": 3,
-        "retailer": "Sobeys",
-        "total": 14.47,
-        "hasAllItems": true
-      }
-];
-
-const products = [
-  {
-        "pid": 1,
-        "name": "Lactantia 2% Milk",
-        "packSize": "2 L",
-        "quantity": 1,
-        "prices": [
-          { "vid": 1, "price": 5.29 },
-          { "vid": 2, "price": 5.49 },
-          { "vid": 3, "price": 5.99 }
-        ],
-        "cheapestVendorIds": [1],
-        "lowestPrice": 5.29
-      },
-      {
-        "pid": 2,
-        "name": "Large Eggs",
-        "packSize": "12 pack",
-        "quantity": 1,
-        "prices": [
-          { "vid": 1, "price": 4.29 },
-          { "vid": 2, "price": 4.49 },
-          { "vid": 3, "price": 4.99 }
-        ],
-        "cheapestVendorIds": [1],
-        "lowestPrice": 4.29
-      },
-      {
-        "pid": 3,
-        "name": "White Bread",
-        "packSize": "675 g",
-        "quantity": 1,
-        "prices": [
-          { "vid": 1, "price": 3.19 },
-          { "vid": 2, "price": 2.99 },
-          { "vid": 3, "price": 3.49 }
-        ],
-        "cheapestVendorIds": [2],
-        "lowestPrice": 2.99
-      }
-];
-
 const money = (value) => `$${value.toFixed(2)}`;
 
 function ComparisonPage() {
+    const [comparison, setComparison] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [empty, setEmpty] = useState(false);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        async function loadComparison() {
+            try {
+                const items = JSON.parse(localStorage.getItem('basket') ?? '[]');
+                if (!Array.isArray(items)) {
+                    throw new Error('Your saved basket is invalid. Please edit your basket.');
+                }
+                if (items.length === 0) {
+                    setEmpty(true);
+                    return;
+                }
+                const result = await compareBasket(items, { signal: controller.signal });
+                if (!controller.signal.aborted) setComparison(result);
+            } catch (err) {
+                if (!controller.signal.aborted) setError(err.message);
+            } finally {
+                if (!controller.signal.aborted) setLoading(false);
+            }
+        }
+
+        loadComparison();
+        return () => controller.abort();
+    }, []);
+
+    const { storeTotals = [], products = [] } = comparison ?? {};
+
 
     const completeStores = storeTotals.filter(
         (store) => store.hasAllItems && Number.isFinite(store.total),
@@ -100,11 +70,16 @@ function ComparisonPage() {
                 </nav>
             </header>
 
+            {loading && <p role="status">Comparing your basket…</p>}
+            {error && <p role="alert">{error}</p>}
+            {empty && <p>Your basket is empty. Add products in the shop to compare prices.</p>}
+
+            {comparison && <>
             {/* Dark green summary banner */}
             <section className="comparison-banner">
                 <div>
                     <p className="comparison-label">THE BASKET BREAKDOWN</p>
-                    <h2>Your groceries. Three price tags.</h2>
+                    <h2>Your groceries. Store-by-store prices.</h2>
                     <p>Compare the same products and pack sizes, store by store.</p>
                 </div>
 
@@ -239,6 +214,8 @@ function ComparisonPage() {
                 </div>
             </section>
 
+            </>}
+
             {/* Action buttons */}
             <div className="comparison-actions">
                 <button type="button" disabled>
@@ -250,7 +227,7 @@ function ComparisonPage() {
             {/* Footer */}
             <footer className="comparison-footer">
                 <p>
-                    Illustrative prices · Matched pack sizes ·
+                    Matched pack sizes ·
                     No loyalty offers or delivery fees included.
                     <br />
                     Prices are estimates for comparison, not a completed purchase.
@@ -258,7 +235,7 @@ function ComparisonPage() {
 
                 <div>
                     <span>A LITTLE LESS SPENDING. A LITTLE MORE KNOWING.</span>
-                    <span>SAMPLE PRICES / CAD / NOT A PURCHASE</span>
+                    <span>PRICES / CAD / NOT A PURCHASE</span>
                 </div>
             </footer>
         </div>
