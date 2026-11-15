@@ -23,3 +23,11 @@ export function quoteBasket(vid, items) {
     body: JSON.stringify({ vid, items }),
   });
 }
+
+export function compareBasket(items) {
+  return request('/api/compare', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items }),
+  });
+}

@@ -1,76 +1,48 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { compareBasket } from '../api.js';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 
-// Temporary sample data for building the layout.
-const storeTotals = [
-  {
-        "vid": 1,
-        "retailer": "Walmart",
-        "total": 12.77,
-        "hasAllItems": true
-      },
-      {
-        "vid": 2,
-        "retailer": "No Frills",
-        "total": 12.97,
-        "hasAllItems": true
-      },
-      {
-        "vid": 3,
-        "retailer": "Sobeys",
-        "total": 14.47,
-        "hasAllItems": true
-      }
-];
-
-const products = [
-  {
-        "pid": 1,
-        "name": "Lactantia 2% Milk",
-        "packSize": "2 L",
-        "quantity": 1,
-        "prices": [
-          { "vid": 1, "price": 5.29 },
-          { "vid": 2, "price": 5.49 },
-          { "vid": 3, "price": 5.99 }
-        ],
-        "cheapestVendorIds": [1],
-        "lowestPrice": 5.29
-      },
-      {
-        "pid": 2,
-        "name": "Large Eggs",
-        "packSize": "12 pack",
-        "quantity": 1,
-        "prices": [
-          { "vid": 1, "price": 4.29 },
-          { "vid": 2, "price": 4.49 },
-          { "vid": 3, "price": 4.99 }
-        ],
-        "cheapestVendorIds": [1],
-        "lowestPrice": 4.29
-      },
-      {
-        "pid": 3,
-        "name": "White Bread",
-        "packSize": "675 g",
-        "quantity": 1,
-        "prices": [
-          { "vid": 1, "price": 3.19 },
-          { "vid": 2, "price": 2.99 },
-          { "vid": 3, "price": 3.49 }
-        ],
-        "cheapestVendorIds": [2],
-        "lowestPrice": 2.99
-      }
-];
-
-const money = (value) => `$${value.toFixed(2)}`;
+const money = (value) => `$${(Math.round(value * 100) / 100).toFixed(2)}`;
 
 function ComparisonPage() {
     const { state } = useLocation();
+    const [comparison, setComparison] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const items = state?.items ?? [];
+
+    useEffect(() => {
+        let active = true;
+
+        if (items.length === 0) {
+            setComparison(null);
+            setError('');
+            setIsLoading(false);
+            return () => { active = false; };
+        }
+
+        setComparison(null);
+        setIsLoading(true);
+        setError('');
+        compareBasket(items.map(({ pid, quantity }) => ({ pid, quantity })))
+            .then((data) => {
+                if (active) setComparison(data);
+            })
+            .catch((requestError) => {
+                if (active) setError(requestError.message);
+            })
+            .finally(() => {
+                if (active) setIsLoading(false);
+            });
+
+        return () => { active = false; };
+    }, [state]);
+
+    const storeTotals = comparison?.storeTotals ?? [];
+    const products = comparison?.products ?? [];
 
     const completeStores = storeTotals.filter(
         (store) => store.hasAllItems && Number.isFinite(store.total),
@@ -87,6 +59,13 @@ function ComparisonPage() {
     const difference = cheapestStore ? (Math.round(mostExpensiveStore.total*100) - lowestTotalCents) / 100 : null;
 
     const cheapestNames = sortedStores.filter( (store) => Math.round(store.total * 100) === lowestTotalCents,).map((store) => store.retailer).join(' / ');
+    const emptyComparisonMessage = isLoading
+        ? 'Comparing your basket…'
+        : error
+            ? `Unable to compare: ${error}`
+            : items.length === 0
+                ? 'Add items to your basket to compare store prices.'
+                : 'No single retailer has every item in your basket.';
 
     return (
         <div className="comparison-page">
@@ -126,7 +105,7 @@ function ComparisonPage() {
                             </p>
                         </>
                     ) : (
-                        <p>No single retailer has every item in your basket.</p>
+                        <p>{emptyComparisonMessage}</p>
                     )}
                 </div>
             </section>
@@ -204,12 +183,21 @@ function ComparisonPage() {
                                                 key={store.vid}
                                                 className={isCheapestProduct ? 'comparison-lowest' : ''}
                                             >
-                                                {hasPrice ? money(entry.price) : 'Unavailable'}
+                                                {hasPrice ? money(entry.price * product.quantity) : 'Unavailable'}
                                             </td>
                                         );
                                     })}
                                 </tr>
                             ))}
+                            {products.length === 0 && (
+                                <tr>
+                                    <td colSpan={Math.max(storeTotals.length + 1, 2)}>
+                                        {isLoading
+                                            ? 'Comparing your basket…'
+                                            : error || 'Add items to your basket to compare store prices.'}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
 
                         <tfoot>

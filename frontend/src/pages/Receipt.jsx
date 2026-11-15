@@ -1,4 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { compareBasket } from '../api.js';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 import './Receipt.css';
@@ -18,6 +20,47 @@ function ReceiptPage() {
   const quote = state?.quote;
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const pricedLines = new Map((quote?.lines ?? []).map((line) => [line.pid, line]));
+  const [priceSpread, setPriceSpread] = useState(null);
+  const [comparableStoreCount, setComparableStoreCount] = useState(0);
+  const [isLoadingSpread, setIsLoadingSpread] = useState(false);
+  const [spreadError, setSpreadError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    if (items.length === 0) {
+      setPriceSpread(null);
+      setComparableStoreCount(0);
+      setIsLoadingSpread(false);
+      setSpreadError(false);
+      return () => { active = false; };
+    }
+
+    setPriceSpread(null);
+    setComparableStoreCount(0);
+    setIsLoadingSpread(true);
+    setSpreadError(false);
+    compareBasket(items.map(({ pid, quantity }) => ({ pid, quantity })))
+      .then((result) => {
+        if (!active) return;
+        const completeStores = result.storeTotals.filter(
+          (store) => store.hasAllItems && Number.isFinite(store.total),
+        );
+        setComparableStoreCount(completeStores.length);
+        if (completeStores.length > 0) {
+          const totalsInCents = completeStores.map((store) => Math.round(store.total * 100));
+          setPriceSpread((Math.max(...totalsInCents) - Math.min(...totalsInCents)) / 100);
+        }
+      })
+      .catch(() => {
+        if (active) setSpreadError(true);
+      })
+      .finally(() => {
+        if (active) setIsLoadingSpread(false);
+      });
+
+    return () => { active = false; };
+  }, [state]);
 
   return (
     <div className="comparison-page receipt-page">
@@ -110,8 +153,20 @@ function ReceiptPage() {
           </div>
           <div className="receipt-quick-peek">
             <span className="receipt-eyebrow">A QUICK PEEK</span>
-            <strong>{itemCount} ITEMS</strong>
-            <span>in this basket, ready to compare.</span>
+            <strong>
+              {isLoadingSpread ? '…' : priceSpread === null ? '—' : money(priceSpread)}
+            </strong>
+            <span>
+              {items.length === 0
+                ? 'Add items to compare store totals.'
+                : spreadError
+                  ? 'Store totals are unavailable right now.'
+                  : comparableStoreCount === 0
+                    ? 'No store has every item in this basket.'
+                    : comparableStoreCount === 1
+                      ? 'Only one store carries the complete basket.'
+                      : `between the lowest and highest totals across ${comparableStoreCount} stores.`}
+            </span>
           </div>
         </aside>
       </section>
