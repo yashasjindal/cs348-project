@@ -1,45 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react'
+import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { compareBasket } from '../api.js';
-import { Link } from 'react-router-dom';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 
-const money = (value) => `$${value.toFixed(2)}`;
+const money = (value) => `$${(Math.round(value * 100) / 100).toFixed(2)}`;
 
 function ComparisonPage() {
+    const { state } = useLocation();
     const [comparison, setComparison] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [empty, setEmpty] = useState(false);
+    const items = state?.items ?? [];
 
     useEffect(() => {
-        const controller = new AbortController();
+        let active = true;
 
-        async function loadComparison() {
-            try {
-                const items = JSON.parse(localStorage.getItem('basket') ?? '[]');
-                if (!Array.isArray(items)) {
-                    throw new Error('Your saved basket is invalid. Please edit your basket.');
-                }
-                if (items.length === 0) {
-                    setEmpty(true);
-                    return;
-                }
-                const result = await compareBasket(items, { signal: controller.signal });
-                if (!controller.signal.aborted) setComparison(result);
-            } catch (err) {
-                if (!controller.signal.aborted) setError(err.message);
-            } finally {
-                if (!controller.signal.aborted) setLoading(false);
-            }
+        if (items.length === 0) {
+            setComparison(null);
+            setError('');
+            setIsLoading(false);
+            return () => { active = false; };
         }
 
-        loadComparison();
-        return () => controller.abort();
-    }, []);
+        setComparison(null);
+        setIsLoading(true);
+        setError('');
+        compareBasket(items.map(({ pid, quantity }) => ({ pid, quantity })))
+            .then((data) => {
+                if (active) setComparison(data);
+            })
+            .catch((requestError) => {
+                if (active) setError(requestError.message);
+            })
+            .finally(() => {
+                if (active) setIsLoading(false);
+            });
 
-    const { storeTotals = [], products = [] } = comparison ?? {};
+        return () => { active = false; };
+    }, [state]);
 
+    const storeTotals = comparison?.storeTotals ?? [];
+    const products = comparison?.products ?? [];
 
     const completeStores = storeTotals.filter(
         (store) => store.hasAllItems && Number.isFinite(store.total),
@@ -56,6 +59,13 @@ function ComparisonPage() {
     const difference = cheapestStore ? (Math.round(mostExpensiveStore.total*100) - lowestTotalCents) / 100 : null;
 
     const cheapestNames = sortedStores.filter( (store) => Math.round(store.total * 100) === lowestTotalCents,).map((store) => store.retailer).join(' / ');
+    const emptyComparisonMessage = isLoading
+        ? 'Comparing your basket…'
+        : error
+            ? `Unable to compare: ${error}`
+            : items.length === 0
+                ? 'Add items to your basket to compare store prices.'
+                : 'No single retailer has every item in your basket.';
 
     return (
         <div className="comparison-page">
@@ -100,7 +110,7 @@ function ComparisonPage() {
                             </p>
                         </>
                     ) : (
-                        <p>No single retailer has every item in your basket.</p>
+                        <p>{emptyComparisonMessage}</p>
                     )}
                 </div>
             </section>
@@ -178,12 +188,21 @@ function ComparisonPage() {
                                                 key={store.vid}
                                                 className={isCheapestProduct ? 'comparison-lowest' : ''}
                                             >
-                                                {hasPrice ? money(entry.price) : 'Unavailable'}
+                                                {hasPrice ? money(entry.price * product.quantity) : 'Unavailable'}
                                             </td>
                                         );
                                     })}
                                 </tr>
                             ))}
+                            {products.length === 0 && (
+                                <tr>
+                                    <td colSpan={Math.max(storeTotals.length + 1, 2)}>
+                                        {isLoading
+                                            ? 'Comparing your basket…'
+                                            : error || 'Add items to your basket to compare store prices.'}
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
 
                         <tfoot>
@@ -218,9 +237,9 @@ function ComparisonPage() {
 
             {/* Action buttons */}
             <div className="comparison-actions">
-                <button type="button" disabled>
+                <Link to="/receipt" state={state} className="comparison-back">
                     ← Back to my receipt
-                </button>
+                </Link>
                 <Link to="/shop">Edit my basket →</Link>
             </div>
 
