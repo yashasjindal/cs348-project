@@ -80,11 +80,16 @@ function ComparisonPage() {
                 </nav>
             </header>
 
+            {loading && <p role="status">Comparing your basket…</p>}
+            {error && <p role="alert">{error}</p>}
+            {empty && <p>Your basket is empty. Add products in the shop to compare prices.</p>}
+
+            {comparison && <>
             {/* Dark green summary banner */}
             <section className="comparison-banner">
                 <div>
                     <p className="comparison-label">THE BASKET BREAKDOWN</p>
-                    <h2>Your groceries. Three price tags.</h2>
+                    <h2>Your groceries. Store-by-store prices.</h2>
                     <p>Compare the same products and pack sizes, store by store.</p>
                 </div>
 
@@ -228,6 +233,8 @@ function ComparisonPage() {
                 </div>
             </section>
 
+            </>}
+
             {/* Action buttons */}
             <div className="comparison-actions">
                 <Link to="/receipt" state={state} className="comparison-back">
@@ -239,7 +246,7 @@ function ComparisonPage() {
             {/* Footer */}
             <footer className="comparison-footer">
                 <p>
-                    Illustrative prices · Matched pack sizes ·
+                    Matched pack sizes ·
                     No loyalty offers or delivery fees included.
                     <br />
                     Prices are estimates for comparison, not a completed purchase.
@@ -247,7 +254,7 @@ function ComparisonPage() {
 
                 <div>
                     <span>A LITTLE LESS SPENDING. A LITTLE MORE KNOWING.</span>
-                    <span>SAMPLE PRICES / CAD / NOT A PURCHASE</span>
+                    <span>PRICES / CAD / NOT A PURCHASE</span>
                 </div>
             </footer>
         </div>
