@@ -141,6 +141,20 @@ To regenerate `test-production.out`:
 MYSQL_PWD=smartcart_dev mysql -u smartcart smartcart_prod -t -vvv --skip-comments < db/test-production.sql > db/test-production.out
 ```
 
+### Query plans and timings (R-c)
+
+`db/production/measure.sh` prints `EXPLAIN` and `EXPLAIN ANALYZE` for each feature query, and the median of 5 timed runs (after a warm-up), read from `performance_schema.events_statements_history` in the same session as the spec's appendix describes. It also runs the before/after index experiments. Each one creates an index, measures again, and then drops the index. It needs one more grant as root:
+
+```sql
+GRANT SELECT ON performance_schema.* TO 'smartcart'@'localhost';
+```
+
+```bash
+db/production/measure.sh > measurements.txt     # about 5 seconds
+```
+
+The script discards result rows and reads only its own session's timings. Printing rows to a terminal and picking up the app's queries were what made hand-timed runs vary so much.
+
 ### How the data is cleaned
 
 `build.py` makes these decisions; `build-report.txt` counts the rows affected by each one.
@@ -157,6 +171,7 @@ MYSQL_PWD=smartcart_dev mysql -u smartcart smartcart_prod -t -vvv --skip-comment
 | `db/production/build.py` | Cleans and matches the raw data, writes one CSV per table |
 | `db/production/statcan_rules.csv` | Name patterns that match grocery listings to StatCan items |
 | `db/production/load.sh` | Recreates `smartcart_prod` from `db/schema.sql` and bulk-loads the CSVs |
+| `db/production/measure.sh` | Query plans, timings and before/after index experiments for each feature (R-c) |
 | `db/test-production.sql` | The feature queries with production pids (first 10 rows where results are long) |
 | `db/test-production.out` | Output of `test-production.sql` on the production database |
 
