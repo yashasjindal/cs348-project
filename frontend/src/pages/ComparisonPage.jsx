@@ -5,44 +5,43 @@ import { compareBasket } from '../api.js';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 
-const money = (value) => `$${(Math.round(value * 100) / 100).toFixed(2)}`;
+const money = (value) => `$${value.toFixed(2)}`;
 
 function ComparisonPage() {
     const { state } = useLocation();
     const [comparison, setComparison] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [empty, setEmpty] = useState(false);
     const items = state?.items ?? [];
 
     useEffect(() => {
-        let active = true;
+        const controller = new AbortController();
 
-        if (items.length === 0) {
-            setComparison(null);
-            setError('');
-            setIsLoading(false);
-            return () => { active = false; };
+        async function loadComparison() {
+            try {
+                const items = JSON.parse(localStorage.getItem('basket') ?? '[]');
+                if (!Array.isArray(items)) {
+                    throw new Error('Your saved basket is invalid. Please edit your basket.');
+                }
+                if (items.length === 0) {
+                    setEmpty(true);
+                    return;
+                }
+                const result = await compareBasket(items, { signal: controller.signal });
+                if (!controller.signal.aborted) setComparison(result);
+            } catch (err) {
+                if (!controller.signal.aborted) setError(err.message);
+            } finally {
+                if (!controller.signal.aborted) setLoading(false);
+            }
         }
 
-        setComparison(null);
-        setIsLoading(true);
-        setError('');
-        compareBasket(items.map(({ pid, quantity }) => ({ pid, quantity })))
-            .then((data) => {
-                if (active) setComparison(data);
-            })
-            .catch((requestError) => {
-                if (active) setError(requestError.message);
-            })
-            .finally(() => {
-                if (active) setIsLoading(false);
-            });
+        loadComparison();
+        return () => controller.abort();
+    }, []);
 
-        return () => { active = false; };
-    }, [state]);
-
-    const storeTotals = comparison?.storeTotals ?? [];
-    const products = comparison?.products ?? [];
+    const { storeTotals = [], products = [] } = comparison ?? {};
 
     const completeStores = storeTotals.filter(
         (store) => store.hasAllItems && Number.isFinite(store.total),
@@ -59,13 +58,34 @@ function ComparisonPage() {
     const difference = cheapestStore ? (Math.round(mostExpensiveStore.total*100) - lowestTotalCents) / 100 : null;
 
     const cheapestNames = sortedStores.filter( (store) => Math.round(store.total * 100) === lowestTotalCents,).map((store) => store.retailer).join(' / ');
-    const emptyComparisonMessage = isLoading
+    const emptyComparisonMessage = loading
         ? 'Comparing your basket…'
         : error
             ? `Unable to compare: ${error}`
             : items.length === 0
                 ? 'Add items to your basket to compare store prices.'
                 : 'No single retailer has every item in your basket.';
+
+    // Split store components
+    const splitBasket = comparison?.summary?.cheapestSplitBasket;
+    const splitSavings = comparison?.summary?.additionalSavings;
+    
+    const productNameById = new Map(
+        products.map((product) => [Number(product.pid), product.name])
+    );
+
+    const splitDescription = splitBasket?.stores
+        .map((store) => {
+            const names = store.productIds
+                .map((pid) => productNameById.get(Number(pid)))
+                .filter(Boolean);
+
+            return names.length > 0
+                ? `${names.join(' + ')} at ${store.retailer}`
+                : null;
+        })
+        .filter(Boolean)
+        .join(', ');
 
     return (
         <div className="comparison-page">
@@ -82,7 +102,12 @@ function ComparisonPage() {
 
             {loading && <p role="status">Comparing your basket…</p>}
             {error && <p role="alert">{error}</p>}
-            {empty && <p>Your basket is empty. Add products in the shop to compare prices.</p>}
+            {empty && (
+                <section className="comparison-empty">
+                    <h2>Your basket is empty.</h2>
+                    <p>Add products in the shop to compare prices.</p>
+                </section>
+            )}
 
             {comparison && <>
             {/* Dark green summary banner */}
@@ -188,21 +213,12 @@ function ComparisonPage() {
                                                 key={store.vid}
                                                 className={isCheapestProduct ? 'comparison-lowest' : ''}
                                             >
-                                                {hasPrice ? money(entry.price * product.quantity) : 'Unavailable'}
+                                                {hasPrice ? money(entry.price) : 'Unavailable'}
                                             </td>
                                         );
                                     })}
                                 </tr>
                             ))}
-                            {products.length === 0 && (
-                                <tr>
-                                    <td colSpan={Math.max(storeTotals.length + 1, 2)}>
-                                        {isLoading
-                                            ? 'Comparing your basket…'
-                                            : error || 'Add items to your basket to compare store prices.'}
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
 
                         <tfoot>
@@ -235,28 +251,55 @@ function ComparisonPage() {
 
             </>}
 
-            {/* Action buttons */}
-            <div className="comparison-actions">
-                <Link to="/receipt" state={state} className="comparison-back">
-                    ← Back to my receipt
-                </Link>
-                <Link to="/shop">Edit my basket →</Link>
+            {/* Split-basket summary */}
+            <div className={`comparison-bottom ${splitBasket ? '' : 'comparison-bottom-no-split'}`}>
+
+                {splitBasket && (<section className="comparison-split-card">
+                    <p className="comparison-label">WORTH AN EXTRA STOP?</p>
+                    <h3>
+                        Split-store basket: {money(splitBasket.total)}
+                    </h3>
+                    <p>
+                        {splitSavings > 0 ? (
+                            <>
+                                {splitDescription}.
+                                Save another {money(splitSavings)}.
+                            </>
+                        ) : cheapestStore ? (
+                            'No additional savings from splitting your basket.'
+                        ) : (
+                            <>
+                                {splitDescription}.
+                            </>
+                        )}
+                    </p>
+                </section>)}
+
+                {/*Action buttons*/}
+                <div className="comparison-actions">
+                    <Link to="/receipt" state={state} className="comparison-back">
+                        ← Back to my receipt
+                    </Link>
+                    <Link to="/shop">Edit my basket →</Link>
+                </div>
             </div>
 
             {/* Footer */}
-            <footer className="comparison-footer">
-                <p>
-                    Matched pack sizes ·
-                    No loyalty offers or delivery fees included.
-                    <br />
-                    Prices are estimates for comparison, not a completed purchase.
-                </p>
+            {comparison && (
+                <footer className="comparison-footer">
+                    <p>
+                        Matched pack sizes ·
+                        No loyalty offers or delivery fees included.
+                        <br />
+                        Prices are estimates for comparison, not a completed purchase.
+                    </p>
 
-                <div>
-                    <span>A LITTLE LESS SPENDING. A LITTLE MORE KNOWING.</span>
-                    <span>PRICES / CAD / NOT A PURCHASE</span>
-                </div>
-            </footer>
+                    <div>
+                        <span>A LITTLE LESS SPENDING. A LITTLE MORE KNOWING.</span>
+                        <span>PRICES / CAD / NOT A PURCHASE</span>
+                    </div>
+                </footer>
+            )}
         </div>
     );
 }
