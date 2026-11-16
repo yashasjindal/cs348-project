@@ -95,6 +95,59 @@ MYSQL_PWD=smartcart_dev mysql -u smartcart smartcart -t -vvv --skip-comments < d
 
 To poke around: `mysql -u smartcart -p smartcart` (password `smartcart_dev`).
 
+## Production database
+
+The production database `smartcart_prod` holds real prices: about 5,800 products, 7,300 current prices and 4 million daily price records from 9 Toronto-area grocers, matched to Statistics Canada's national average prices. It uses the same `db/schema.sql` as the sample database, which stays untouched.
+
+Sources:
+- [Project Hammer](https://www.projecthammer.org/get-the-data.html): daily grocery prices scraped since February 2024 (`hammer-5-csv.zip`, about 540 MB zipped, 4 GB unzipped)
+- [Statistics Canada table 18-10-0245-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810024501): monthly average retail prices for 110 food and household items, Canada-wide
+
+The raw data is too big for the repo, so you download it and build the tables yourself. Building needs Python 3.9 or newer (standard library only) and about 5 GB of free disk space.
+
+### 1. One-time MySQL setup (as root)
+
+```sql
+CREATE DATABASE smartcart_prod;
+GRANT ALL PRIVILEGES ON smartcart_prod.* TO 'smartcart'@'localhost';
+SET PERSIST local_infile = 1;   -- lets load.sh bulk-load CSV files
+```
+
+### 2. Download, build and load
+
+```bash
+db/production/download.sh            # into db/production/raw/ (git-ignored); resumes if interrupted
+python3 db/production/build.py       # writes CSVs and build-report.txt to db/production/out/ (about 2 minutes)
+db/production/load.sh                # recreates smartcart_prod and loads the CSVs (about 20 seconds)
+```
+
+To point the app at production data, set `DB_NAME=smartcart_prod` in `backend/.env`.
+
+To regenerate `test-production.out`:
+
+```bash
+MYSQL_PWD=smartcart_dev mysql -u smartcart smartcart_prod -t -vvv --skip-comments < db/test-production.sql > db/test-production.out
+```
+
+### How the data is cleaned
+
+`build.py` makes these decisions; `build-report.txt` counts the rows affected by each one.
+
+- **Matching to StatCan.** Each product must match exactly one StatCan item (`Product.sid` is `NOT NULL`). `statcan_rules.csv` gives each item a name pattern, words to exclude and a category. Packaged items must also be within 10% of the StatCan package size; for example, "Butter, 454 grams" accepts 409–499 g. Listings that match no item, or more than one, are dropped.
+- **Per-kilogram and per-unit items.** Produce and meat that StatCan prices per kilogram are stored as 1 kg, using the store's per-weight price. Items priced per unit (avocado, lemons) must be sold singly.
+- **One product, many stores.** Listings with the same UPC become one `Product` with a `Sells` row per store, so the basket and compare features can price the same item at different stores.
+- **Prices.** One price per product, store and day. The script skips multi-buy prices ("2/$7.00"), prices more than 3× away from that listing's median (Walmart sometimes shows $2.98 as $298), and prices far outside the StatCan benchmark. `Sells.price` is the latest price. Store listings with no price in the last 30 days are dropped.
+- **StatCan.** Canada-wide rows only. `StatCan.price` and `reference_month` repeat the latest `StatCanPriceHistory` row.
+
+| File | Contents |
+|---|---|
+| `db/production/download.sh` | Downloads both raw datasets |
+| `db/production/build.py` | Cleans and matches the raw data, writes one CSV per table |
+| `db/production/statcan_rules.csv` | Name patterns that match grocery listings to StatCan items |
+| `db/production/load.sh` | Recreates `smartcart_prod` from `db/schema.sql` and bulk-loads the CSVs |
+| `db/test-production.sql` | The feature queries with production pids (first 10 rows where results are long) |
+| `db/test-production.out` | Output of `test-production.sql` on the production database |
+
 ## Running the application
 
 Requires Node.js 20 or newer, and the database from the steps above.
