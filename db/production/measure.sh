@@ -107,8 +107,8 @@ time_query() {
 
 show_plans() {
     local sql="$1"
-    echo "EXPLAIN:"
-    db -E -e "EXPLAIN $sql" | sed 's/^/    /'      # -E prints one field per line, like \G
+    echo "EXPLAIN (traditional: type, key, rows per table):"
+    db -t -e "EXPLAIN FORMAT=TRADITIONAL $sql" | sed 's/^/    /'
     echo "EXPLAIN ANALYZE:"
     db -N -B -r -e "EXPLAIN ANALYZE $sql" | sed 's/^/    /'
 }
@@ -164,7 +164,7 @@ before_after() {
 
 # ---------------------------------------------------------------- run
 
-for idx in SellsPidVidIndex:Sells ProductNameIndex:Product ProductNameFT:Product; do
+for idx in SellsPidVidIndex:Sells ProductNameIndex:Product ProductBrandIndex:Product; do
     if [[ -n "$(db -N -e "SHOW INDEX FROM ${idx#*:} WHERE Key_name = '${idx%%:*}'")" ]]; then
         echo "Index ${idx%%:*} already exists on ${idx#*:}; drop it first so 'before' is measured without it." >&2
         exit 1
@@ -206,20 +206,19 @@ else
     echo
 fi
 
-# Feature 1 rewritten for a FULLTEXT index. MATCH matches whole words, so it differs from
-# LIKE '%milk%' (e.g. 'Buttermilk' no longer matches); the row counts are printed for comparison.
-F1_FT=$(cat <<'SQL'
+# Feature 1 with its brand and category filters set, as in db/test-production.sql.
+F1_BRAND=$(cat <<'SQL'
 SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category, s.price, r.name AS retailer
 FROM Product p, Sells s, Vendor r
-WHERE p.pid = s.pid AND s.vid = r.vid AND MATCH (p.name) AGAINST ('+milk' IN BOOLEAN MODE)
-  AND (NULL IS NULL OR p.category = NULL) AND (NULL IS NULL OR p.brand = NULL)
+WHERE p.pid = s.pid AND s.vid = r.vid AND p.name LIKE '%peanut butter%'
+  AND ('Pantry' IS NULL OR p.category = 'Pantry') AND ('Jif' IS NULL OR p.brand = 'Jif')
 ORDER BY p.name, p.pid, r.name
 SQL
 )
 
 before_after "Feature 4 with an index on Sells(pid, vid)" "$F4" "$F4" \
     Sells SellsPidVidIndex "CREATE INDEX SellsPidVidIndex ON Sells (pid, vid)"
-before_after "Feature 1 with a B-tree index on Product(name)" "$F1" "$F1" \
+before_after "Feature 1 (brand filter 'Jif') with an index on Product(brand)" "$F1_BRAND" "$F1_BRAND" \
+    Product ProductBrandIndex "CREATE INDEX ProductBrandIndex ON Product (brand)"
+before_after "Feature 1 (keyword only) with an index on Product(name)" "$F1" "$F1" \
     Product ProductNameIndex "CREATE INDEX ProductNameIndex ON Product (name)"
-before_after "Feature 1 rewritten to use a FULLTEXT index on Product(name)" "$F1" "$F1_FT" \
-    Product ProductNameFT "CREATE FULLTEXT INDEX ProductNameFT ON Product (name)"
