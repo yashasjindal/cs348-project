@@ -105,6 +105,10 @@ Sources:
 - [Project Hammer](https://www.projecthammer.org/get-the-data.html): daily grocery prices scraped since February 2024 (`hammer-5-csv.zip`, about 540 MB zipped, 4 GB unzipped)
 - [Statistics Canada table 18-10-0245-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810024501): monthly average retail prices for 110 food and household items, Canada-wide
 
+Data credits:
+- Grocery prices come from [Project Hammer](https://www.projecthammer.org/).
+- Adapted from Statistics Canada, Table 18-10-0245-01 Monthly average retail prices for selected products, January 2017 to September 2026. This does not constitute an endorsement by Statistics Canada of this product.
+
 The raw data is too big for the repo, so you download it and build the tables yourself. Building needs Python 3.9 or newer (standard library only) and about 5 GB of free disk space.
 
 ### 1. One-time MySQL setup (as root)
