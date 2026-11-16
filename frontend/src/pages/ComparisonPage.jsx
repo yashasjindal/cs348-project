@@ -57,6 +57,27 @@ function ComparisonPage() {
 
     const cheapestNames = sortedStores.filter( (store) => Math.round(store.total * 100) === lowestTotalCents,).map((store) => store.retailer).join(' / ');
 
+    // Split store components
+    const splitBasket = comparison?.summary?.cheapestSplitBasket;
+    const splitSavings = comparison?.summary?.additionalSavings;
+    
+    const productNameById = new Map(
+        products.map((product) => [Number(product.pid), product.name])
+    );
+
+    const splitDescription = splitBasket?.stores
+        .map((store) => {
+            const names = store.productIds
+                .map((pid) => productNameById.get(Number(pid)))
+                .filter(Boolean);
+
+            return names.length > 0
+                ? `${names.join(' + ')} at ${store.retailer}`
+                : null;
+        })
+        .filter(Boolean)
+        .join(', ');
+
     return (
         <div className="comparison-page">
             <header className="comparison-header">
@@ -214,15 +235,37 @@ function ComparisonPage() {
                 </div>
             </section>
 
+            {/* Split-basket summary */}
+            <div className={`comparison-bottom ${splitBasket ? '' : 'comparison-bottom-no-split'}`}>
+
+                {splitBasket && (<section className="comparison-split-card">
+                    <p className="comparison-label">WORTH AN EXTRA STOP?</p>
+                    <h3>
+                        Split-store basket: {money(splitBasket.total)}
+                    </h3>
+                    <p>
+                        {splitDescription}. {splitSavings > 0 ? ` Save another ${money(splitSavings)}.` : ''}
+                    </p>
+                </section>)}
+
+                {/*Action buttons*/}
+                <div className="comparison-actions">
+                    <button type="button" disabled>
+                        ← Back to my receipt
+                    </button>
+                    <Link to="/shop">Edit my basket →</Link>
+                </div>
+            </div>
+
             </>}
 
-            {/* Action buttons */}
+            {/* Action buttons
             <div className="comparison-actions">
                 <button type="button" disabled>
                     ← Back to my receipt
                 </button>
                 <Link to="/shop">Edit my basket →</Link>
-            </div>
+            </div> */}
 
             {/* Footer */}
             <footer className="comparison-footer">

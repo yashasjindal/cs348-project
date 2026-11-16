@@ -213,6 +213,7 @@
   width: 40%;
   margin-left: auto;
   margin-top: 16px;
+  align-self: start;
 }
 
 .comparison-actions button,
@@ -251,4 +252,50 @@
   gap: 16px;
   margin-top: 20px;
   font-weight: 600;
+}
+
+/* Split basket */
+.comparison-bottom {
+    display: grid;
+    grid-template-columns: 1.25fr 0.95fr;
+    gap: 16px;
+    margin-top: 16px;
+    align-items: start;
+}
+
+.comparison-split-card {
+    margin: 0;
+    padding: 14px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: var(--yellow);
+    align-self: start;
+}
+
+.comparison-split-card .comparison-label {
+    margin-bottom: 8px;
+    color: var(--ink);
+}
+
+.comparison-split-card h3 {
+    margin-bottom: 6px;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+.comparison-split-card p:last-child {
+    font-size: 12px;
+    line-height: 1.5;
+    background: var(--yellow);
+}
+
+.comparison-bottom .comparison-actions {
+    width: 100%;
+    margin: 0;
+}
+
+/* When no split basket is available */
+.comparison-bottom-no-split {
+    grid-template-columns: 1fr;
 }
