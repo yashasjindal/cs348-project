@@ -172,11 +172,12 @@ function ShopPage() {
               <div className="products">
                 {results.map((r) => (
                 <ProductCard
-                  key={r.pid}
+                  key={`${r.pid}-${r.vid}`}
                   brand={r.brand}
                   name={r.name}
                   size={`${r.quantity} ${r.unit}`}
                   price={r.price}
+                  vendor={r.vendor}
                   onClick={() => add(r)}
                 />
               ))}
