@@ -1,0 +1,169 @@
+--------------
+SELECT 'StatCan' AS tbl, COUNT(*) AS `rows` FROM StatCan
+UNION ALL SELECT 'StatCanPriceHistory', COUNT(*) FROM StatCanPriceHistory
+UNION ALL SELECT 'Product', COUNT(*) FROM Product
+UNION ALL SELECT 'Vendor', COUNT(*) FROM Vendor
+UNION ALL SELECT 'Sells', COUNT(*) FROM Sells
+UNION ALL SELECT 'PriceHistory', COUNT(*) FROM PriceHistory
+--------------
+
++---------------------+---------+
+| tbl                 | rows    |
++---------------------+---------+
+| StatCan             |     110 |
+| StatCanPriceHistory |   12870 |
+| Product             |    5762 |
+| Vendor              |       9 |
+| Sells               |    7260 |
+| PriceHistory        | 4010194 |
++---------------------+---------+
+6 rows in set (0.123 sec)
+
+--------------
+SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category, s.price, r.name AS retailer
+FROM Product p, Sells s, Vendor r
+WHERE p.pid = s.pid AND s.vid = r.vid AND p.name LIKE '%milk%'
+  AND (NULL IS NULL OR p.category = NULL) AND (NULL IS NULL OR p.brand = NULL)
+ORDER BY p.name, p.pid, r.name
+LIMIT 10
+--------------
+
++------+---------------------------+-----------+----------+------+--------------+-------+-----------+
+| pid  | name                      | brand     | quantity | unit | category     | price | retailer  |
++------+---------------------------+-----------+----------+------+--------------+-------+-----------+
+| 5760 | 0% Lactose Free Milk      | Neilson   |    1.000 | L    | Dairy & Eggs |  4.69 | Loblaws   |
+| 5883 | 0% Lactose Free Milk      | Neilson   |    2.000 | L    | Dairy & Eggs |  7.39 | Loblaws   |
+| 5883 | 0% Lactose Free Milk      | Neilson   |    2.000 | L    | Dairy & Eggs |  6.25 | No Frills |
+| 6120 | 0% Lactose-Free Milk      | LACTANTIA |    4.000 | L    | Dairy & Eggs | 11.49 | Metro     |
+| 5885 | 0% Lactose-Free Skim Milk | LACTANTIA |    2.000 | L    | Dairy & Eggs |  6.79 | Galleria  |
+| 5761 | 0% Microfiltered Milk     | Neilson   |    1.000 | L    | Dairy & Eggs |  3.94 | Loblaws   |
+| 5886 | 0% Microfiltered Milk     | Neilson   |    2.000 | L    | Dairy & Eggs |  5.83 | Loblaws   |
+| 5886 | 0% Microfiltered Milk     | Neilson   |    2.000 | L    | Dairy & Eggs |  5.78 | No Frills |
+| 6122 | 0% Microfiltered Milk     | Neilson   |    4.000 | L    | Dairy & Eggs |  7.09 | Loblaws   |
+| 6122 | 0% Microfiltered Milk     | Neilson   |    4.000 | L    | Dairy & Eggs |  5.75 | No Frills |
++------+---------------------------+-----------+----------+------+--------------+-------+-----------+
+10 rows in set (0.004 sec)
+
+--------------
+SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category, s.price, r.name AS retailer
+FROM Product p, Sells s, Vendor r
+WHERE p.pid = s.pid AND s.vid = r.vid AND p.name LIKE '%peanut butter%'
+  AND ('Pantry' IS NULL OR p.category = 'Pantry') AND ('Jif' IS NULL OR p.brand = 'Jif')
+ORDER BY p.name, p.pid, r.name
+LIMIT 10
+--------------
+
++------+-----------------------+-------+----------+------+----------+-------+---------------+
+| pid  | name                  | brand | quantity | unit | category | price | retailer      |
++------+-----------------------+-------+----------+------+----------+-------+---------------+
+| 7311 | Creamy Peanut Butter  | Jif   |    1.000 | kg   | Pantry   |  5.99 | Metro         |
+| 7311 | Creamy Peanut Butter  | Jif   |    1.000 | kg   | Pantry   |  5.49 | Save-On-Foods |
+| 7311 | Creamy Peanut Butter  | Jif   |    1.000 | kg   | Pantry   |  6.99 | Sobeys        |
+| 7311 | Creamy Peanut Butter  | Jif   |    1.000 | kg   | Pantry   |  7.49 | Voila         |
+| 7311 | Creamy Peanut Butter  | Jif   |    1.000 | kg   | Pantry   |  7.87 | Walmart       |
+| 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  9.99 | Galleria      |
+| 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  5.99 | Metro         |
+| 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  5.49 | Save-On-Foods |
+| 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  6.99 | Sobeys        |
+| 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  7.49 | Voila         |
++------+-----------------------+-------+----------+------+----------+-------+---------------+
+10 rows in set (0.002 sec)
+
+--------------
+WITH BasketItems AS (
+    SELECT 5602 AS pid, 1 AS cart_quantity
+    UNION
+    SELECT 7312, 2
+    UNION
+    SELECT 1887, 1
+)
+SELECT p.name, b.cart_quantity, s.price AS unit_price, b.cart_quantity * s.price AS subtotal
+FROM BasketItems b JOIN Product p ON b.pid = p.pid JOIN Sells s ON p.pid = s.pid
+WHERE s.vid = 3
+--------------
+
++-----------------------+---------------+------------+----------+
+| name                  | cart_quantity | unit_price | subtotal |
++-----------------------+---------------+------------+----------+
+| Tomato Ketchup        |             1 |       6.49 |     6.49 |
+| Crunchy Peanut Butter |             2 |       5.99 |    11.98 |
+| Diced Tomatoes        |             1 |       1.99 |     1.99 |
++-----------------------+---------------+------------+----------+
+3 rows in set (0.000 sec)
+
+--------------
+WITH BasketItems AS (
+    SELECT 5602 AS pid, 1 AS cart_quantity
+    UNION
+    SELECT 7312, 1
+    UNION
+    SELECT 1887, 1
+)
+SELECT p.name, b.cart_quantity, s.price AS unit_price, b.cart_quantity * s.price AS subtotal,
+       sc.price AS benchmark_price, b.cart_quantity * sc.price AS benchmark_subtotal
+FROM BasketItems b JOIN Product p ON b.pid = p.pid JOIN Sells s ON p.pid = s.pid
+     LEFT JOIN StatCan sc ON p.sid = sc.sid
+WHERE s.vid = 3
+--------------
+
++-----------------------+---------------+------------+----------+-----------------+--------------------+
+| name                  | cart_quantity | unit_price | subtotal | benchmark_price | benchmark_subtotal |
++-----------------------+---------------+------------+----------+-----------------+--------------------+
+| Tomato Ketchup        |             1 |       6.49 |     6.49 |            4.80 |               4.80 |
+| Crunchy Peanut Butter |             1 |       5.99 |     5.99 |            5.99 |               5.99 |
+| Diced Tomatoes        |             1 |       1.99 |     1.99 |            2.07 |               2.07 |
++-----------------------+---------------+------------+----------+-----------------+--------------------+
+3 rows in set (0.000 sec)
+
+--------------
+WITH BasketItems AS (
+    SELECT 5602 AS pid, 1 AS cart_quantity
+    UNION
+    SELECT 7312, 1
+    UNION
+    SELECT 1887, 1
+)
+SELECT v.name AS retailer, SUM(b.cart_quantity * s.price) AS total_cost
+FROM BasketItems b, Sells s, Vendor v
+WHERE b.pid = s.pid AND s.vid = v.vid
+GROUP BY v.vid, v.name
+HAVING COUNT(DISTINCT b.pid) = (SELECT COUNT(DISTINCT pid) FROM BasketItems)
+ORDER BY total_cost ASC
+--------------
+
++---------------+------------+
+| retailer      | total_cost |
++---------------+------------+
+| Metro         |      14.47 |
+| Save-On-Foods |      15.17 |
+| Sobeys        |      15.97 |
+| Voila         |      17.27 |
+| Galleria      |      21.17 |
++---------------+------------+
+5 rows in set (0.001 sec)
+
+--------------
+SELECT p.pid, p.name, p.brand, p.quantity, p.unit, COUNT(*) AS retailers
+FROM Product p JOIN Sells s ON s.pid = p.pid
+GROUP BY p.pid, p.name, p.brand, p.quantity, p.unit
+ORDER BY retailers DESC, p.pid
+LIMIT 10
+--------------
+
++------+--------------------------------+---------------+----------+------+-----------+
+| pid  | name                           | brand         | quantity | unit | retailers |
++------+--------------------------------+---------------+----------+------+-----------+
+| 2378 | Shreddies Original Cereals     | Post          |  440.000 | g    |         7 |
+| 5112 | Mixed Vegetables               | Green Giant   |  750.000 | g    |         7 |
+| 1545 | Corn Niblets, Whole Kernel     | Green Giant   |  341.000 | mL   |         6 |
+| 2138 | Canola Oil                     | Mazola        |    2.840 | L    |         6 |
+| 2273 | Honey Cereal                   | Post          |  440.000 | g    |         6 |
+| 6528 | Premium Extra Virgin Olive Oil | Terra Delyssa |    1.000 | L    |         6 |
+| 7312 | Crunchy Peanut Butter          | Jif           |    1.000 | kg   |         6 |
+| 8159 | Caffè Verona Ground Coffee     | Starbucks     |  340.000 | g    |         6 |
+| 9826 | Corn Oil                       | Mazola        |    2.840 | L    |         6 |
+| 1346 | Black Beans                    | UNICO         |  540.000 | mL   |         5 |
++------+--------------------------------+---------------+----------+------+-----------+
+10 rows in set (0.012 sec)
+
+Bye
