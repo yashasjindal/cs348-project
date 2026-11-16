@@ -178,6 +178,53 @@
   white-space: nowrap;
 }
 
+.receipt-item-description small.receipt-item-benchmark {
+  color: var(--receipt-green);
+}
+
+/* Feature 3: basket total vs the Statistics Canada average */
+.receipt-benchmark {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #203c34;
+}
+
+.receipt-benchmark-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+}
+
+.receipt-benchmark-verdict {
+  margin: 0 !important;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.receipt-benchmark-verdict.below {
+  background: var(--receipt-mint);
+  color: var(--receipt-green);
+}
+
+.receipt-benchmark-verdict.above {
+  background: #f6e3dc;
+  color: #8a3b24;
+}
+
+.receipt-benchmark-note {
+  color: #607266;
+  font-size: 10px;
+}
+
 .receipt-empty {
   margin: 20px 0 !important;
   color: #607266;
