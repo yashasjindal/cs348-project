@@ -27,5 +27,8 @@ mysql -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" -t -e "
     UNION ALL SELECT 'Product', COUNT(*) FROM Product
     UNION ALL SELECT 'Vendor', COUNT(*) FROM Vendor
     UNION ALL SELECT 'Sells', COUNT(*) FROM Sells
-    UNION ALL SELECT 'PriceHistory', COUNT(*) FROM PriceHistory;"
+    UNION ALL SELECT 'PriceHistory', COUNT(*) FROM PriceHistory
+    UNION ALL SELECT 'User', COUNT(*) FROM User
+    UNION ALL SELECT 'Basket', COUNT(*) FROM Basket
+    UNION ALL SELECT 'BasketItem', COUNT(*) FROM BasketItem;"
 echo "Done."

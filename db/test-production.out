@@ -17,7 +17,7 @@ UNION ALL SELECT 'PriceHistory', COUNT(*) FROM PriceHistory
 | Sells               |    7260 |
 | PriceHistory        | 4010194 |
 +---------------------+---------+
-6 rows in set (0.123 sec)
+6 rows in set (0.090 sec)
 
 --------------
 SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category, s.price, r.name AS retailer
@@ -67,7 +67,7 @@ LIMIT 10
 | 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  6.99 | Sobeys        |
 | 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  7.49 | Voila         |
 +------+-----------------------+-------+----------+------+----------+-------+---------------+
-10 rows in set (0.002 sec)
+10 rows in set (0.003 sec)
 
 --------------
 WITH BasketItems AS (
@@ -140,7 +140,31 @@ ORDER BY total_cost ASC
 | Voila         |      17.27 |
 | Galleria      |      21.17 |
 +---------------+------------+
-5 rows in set (0.001 sec)
+5 rows in set (0.000 sec)
+
+--------------
+INSERT INTO User (username, password_hash)
+VALUES ('alice', '$2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW')
+--------------
+
+Query OK, 1 row affected (0.003 sec)
+
+--------------
+SELECT uid, username, password_hash FROM User WHERE username = 'alice'
+--------------
+
++-----+----------+--------------------------------------------------------------+
+| uid | username | password_hash                                                |
++-----+----------+--------------------------------------------------------------+
+|   1 | alice    | $2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW |
++-----+----------+--------------------------------------------------------------+
+1 row in set (0.000 sec)
+
+--------------
+DELETE FROM User WHERE username = 'alice'
+--------------
+
+Query OK, 1 row affected (0.001 sec)
 
 --------------
 SELECT p.pid, p.name, p.brand, p.quantity, p.unit, COUNT(*) AS retailers
@@ -164,6 +188,6 @@ LIMIT 10
 | 9826 | Corn Oil                       | Mazola        |    2.840 | L    |         6 |
 | 1346 | Black Beans                    | UNICO         |  540.000 | mL   |         5 |
 +------+--------------------------------+---------------+----------+------+-----------+
-10 rows in set (0.012 sec)
+10 rows in set (0.013 sec)
 
 Bye

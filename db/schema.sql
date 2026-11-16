@@ -3,6 +3,9 @@
 -- Re-runnable: drops existing tables first (children before parents).
 -- Table names are case-sensitive on Linux, so always write them exactly as below.
 
+DROP TABLE IF EXISTS BasketItem;
+DROP TABLE IF EXISTS Basket;
+DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS StatCanPriceHistory;
 DROP TABLE IF EXISTS PriceHistory;
 DROP TABLE IF EXISTS Sells;
@@ -85,4 +88,44 @@ CREATE TABLE StatCanPriceHistory (
     PRIMARY KEY (sid, recorded_at),
     CONSTRAINT fk_statcanpricehistory_statcan FOREIGN KEY (sid) REFERENCES StatCan (sid) ON DELETE CASCADE,
     CONSTRAINT chk_statcanpricehistory_price CHECK (price >= 0)
+);
+
+-- An app user account. uid is generated on sign-up.
+-- username is UNIQUE so two people can't register the same name, even if they sign up at the
+-- same moment (the database rejects the second INSERT). The default collation is case-insensitive,
+-- so 'Alice' and 'alice' count as the same username.
+-- password_hash holds a salted hash (e.g. bcrypt, 60 characters), never the plain password.
+CREATE TABLE User (
+    uid            INT          NOT NULL AUTO_INCREMENT,
+    username       VARCHAR(50)  NOT NULL,
+    password_hash  VARCHAR(255) NOT NULL,
+    PRIMARY KEY (uid),
+    CONSTRAINT uq_user_username UNIQUE (username),
+    CONSTRAINT chk_user_username CHECK (CHAR_LENGTH(TRIM(username)) > 0)
+);
+
+-- A saved shopping basket. A user can keep several baskets.
+-- updated_at changes automatically when the Basket row is updated; the app also touches it
+-- when the basket's items change, since those are rows in BasketItem.
+CREATE TABLE Basket (
+    bid         INT       NOT NULL AUTO_INCREMENT,
+    uid         INT       NOT NULL,
+    created_at  DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (bid),
+    -- Deleting an account deletes its baskets.
+    CONSTRAINT fk_basket_user FOREIGN KEY (uid) REFERENCES User (uid) ON DELETE CASCADE,
+    CONSTRAINT chk_basket_times CHECK (updated_at >= created_at)
+);
+
+-- The products in a basket and how many of each (Basket contains Product, many-to-many).
+-- Each product appears at most once per basket; changing the amount updates quantity.
+CREATE TABLE BasketItem (
+    bid       INT  NOT NULL,
+    pid       INT  NOT NULL,
+    quantity  INT  NOT NULL,
+    PRIMARY KEY (bid, pid),
+    CONSTRAINT fk_basketitem_basket  FOREIGN KEY (bid) REFERENCES Basket (bid)  ON DELETE CASCADE,
+    CONSTRAINT fk_basketitem_product FOREIGN KEY (pid) REFERENCES Product (pid) ON DELETE CASCADE,
+    CONSTRAINT chk_basketitem_quantity CHECK (quantity > 0)
 );

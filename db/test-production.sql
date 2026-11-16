@@ -71,6 +71,16 @@ GROUP BY v.vid, v.name
 HAVING COUNT(DISTINCT b.pid) = (SELECT COUNT(DISTINCT pid) FROM BasketItems)
 ORDER BY total_cost ASC;
 
+-- Feature 5: Create an account, then log in. The production data has no app users yet, so this
+-- signs up a test account and removes it again at the end, leaving the database unchanged.
+-- (The hash is a real bcrypt hash of the test password 'alice-sample-pw'.)
+INSERT INTO User (username, password_hash)
+VALUES ('alice', '$2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW');
+
+SELECT uid, username, password_hash FROM User WHERE username = 'alice';
+
+DELETE FROM User WHERE username = 'alice';
+
 -- Helper (not a feature): the products stocked by the most retailers, for choosing basket pids
 SELECT p.pid, p.name, p.brand, p.quantity, p.unit, COUNT(*) AS retailers
 FROM Product p JOIN Sells s ON s.pid = p.pid
