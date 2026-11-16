@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { compareBasket } from '../api.js';
+import { compareBasket, receiptBasket } from '../api.js';
 import Button from '../components/button/Button.jsx';
 import './ComparisonPage.css';
 import './Receipt.css';
@@ -13,6 +13,23 @@ const receiptDate = new Intl.DateTimeFormat('en-GB', {
 
 const money = (amount) => `$${Number(amount).toFixed(2)}`;
 
+// '2026-09' -> 'SEP 2026' (StatCan publishes one average per month).
+const monthLabel = (yyyymm) => {
+  if (!yyyymm) return '';
+  const [year, month] = yyyymm.split('-').map(Number);
+  return new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(Date.UTC(year, month - 1, 1)))
+    .toUpperCase();
+};
+
+// One line comparing the basket with the Canadian average.
+function benchmarkVerdict({ difference, percent }) {
+  const pct = percent === null ? '' : ` (${Math.abs(percent).toFixed(1)}%)`;
+  if (difference > 0) return `YOU PAY ${money(difference)}${pct} MORE THAN THE CANADIAN AVERAGE`;
+  if (difference < 0) return `YOU PAY ${money(-difference)}${pct} LESS THAN THE CANADIAN AVERAGE`;
+  return 'RIGHT ON THE CANADIAN AVERAGE';
+}
+
 function ReceiptPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -24,6 +41,23 @@ function ReceiptPage() {
   const [comparableStoreCount, setComparableStoreCount] = useState(0);
   const [isLoadingSpread, setIsLoadingSpread] = useState(false);
   const [spreadError, setSpreadError] = useState(false);
+  // Feature 3: the same basket at this store with Statistics Canada averages.
+  const [receipt, setReceipt] = useState(null);
+  const [receiptError, setReceiptError] = useState(false);
+  const benchmarkLines = new Map((receipt?.lines ?? []).map((line) => [line.pid, line]));
+  const benchmark = receipt?.benchmark ?? null;
+
+  useEffect(() => {
+    let active = true;
+    setReceipt(null);
+    setReceiptError(false);
+    if (items.length === 0 || !quote?.vid) return () => { active = false; };
+
+    receiptBasket(quote.vid, items.map(({ pid, quantity }) => ({ pid, quantity })))
+      .then((result) => { if (active) setReceipt(result); })
+      .catch(() => { if (active) setReceiptError(true); });
+    return () => { active = false; };
+  }, [state]);
 
   useEffect(() => {
     let active = true;
@@ -109,11 +143,17 @@ function ReceiptPage() {
             <ul className="receipt-items">
               {items.map((item) => {
                 const line = pricedLines.get(item.pid);
+                const benchmarkLine = benchmarkLines.get(item.pid);
                 return (
                   <li key={item.pid}>
                     <div className="receipt-item-description">
                       <span>{item.name}</span>
                       <small>{item.quantity} × {item.size} {item.unit}</small>
+                      {benchmarkLine?.benchmark_price != null && (
+                        <small className="receipt-item-benchmark">
+                          CDN AVG {money(benchmarkLine.benchmark_subtotal)} · {benchmarkLine.benchmark_item}
+                        </small>
+                      )}
                     </div>
                     <span className="receipt-item-price">
                       {line ? money(line.subtotal) : 'N/A'}
@@ -133,6 +173,26 @@ function ReceiptPage() {
               <span>{itemCount} ITEMS</span>
               <span>ESTIMATED TOTAL</span>
             </div>
+
+            {benchmark && (
+              <div className="receipt-benchmark">
+                <div className="receipt-benchmark-row">
+                  <span>CANADIAN AVERAGE*</span>
+                  <span>{money(benchmark.canadianTotal)}</span>
+                </div>
+                <p className={`receipt-benchmark-verdict ${benchmark.difference > 0 ? 'above' : 'below'}`}>
+                  {benchmarkVerdict(benchmark)}
+                </p>
+                <small className="receipt-benchmark-note">
+                  *Statistics Canada average retail prices, {monthLabel(benchmark.referenceMonth)}
+                  {benchmark.storeTotal !== receipt.total &&
+                    ` · compared on the ${benchmark.items} items with an average (${money(benchmark.storeTotal)} here)`}
+                </small>
+              </div>
+            )}
+            {receiptError && (
+              <small className="receipt-benchmark-note">The Canadian average is unavailable right now.</small>
+            )}
           </section>
 
           <footer className="receipt-paper-footer">

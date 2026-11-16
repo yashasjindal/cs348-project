@@ -24,6 +24,15 @@ export function quoteBasket(vid, items) {
   });
 }
 
+// Basket at one store with each item's Statistics Canada average (feature 3, the receipt).
+export function receiptBasket(vid, items) {
+  return request('/api/basket/receipt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vid, items }),
+  });
+}
+
 export function compareBasket(items) {
   return request('/api/compare', {
     method: 'POST',
