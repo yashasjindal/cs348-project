@@ -24,12 +24,10 @@ export function quoteBasket(vid, items) {
   });
 }
 
-// Send the current browser basket; prices are resolved by the backend.
-export function compareBasket(items, { signal } = {}) {
+export function compareBasket(items) {
   return request('/api/compare', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items: items.map(({ pid, quantity }) => ({ pid, quantity })) }),
-    signal,
+    body: JSON.stringify({ items }),
   });
 }

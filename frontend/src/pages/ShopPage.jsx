@@ -1,7 +1,8 @@
 import React from 'react'
 import './ShopPage.css'
-import { useEffect, useState, useRef } from 'react';
-import { getVendors, quoteBasket, searchProducts } from '../api.js';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getVendors, quoteBasket } from '../api.js';
 import Button from '../components/button/Button.jsx'
 import ProductCard from '../components/product_card/ProductCard.jsx'
 import BasketCard from '../components/basket_card/BasketCard.jsx'
@@ -9,8 +10,7 @@ import SearchBar from '../components/search_bar/SearchBar.jsx';
 import Filter from '../components/filter/Filter.jsx';
 
 function ShopPage() {
-  const [q, setQ] = useState('');
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const [results, setResults] = useState([]);
   const [items, setItems] = useState(() => {
   const savedBasket = localStorage.getItem('basket');
@@ -190,6 +190,15 @@ function ShopPage() {
               vid={vid}
               setVid={setVid}
               quote={quote}
+              onPrintReceipt={() =>
+                navigate('/receipt', {
+                  state: {
+                    items,
+                    quote,
+                    vendorName: vendors.find((vendor) => vendor.vid === vid)?.name,
+                  },
+                })
+              }
             />
           </div>
         </div>

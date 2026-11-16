@@ -2,7 +2,7 @@ import React from 'react'
 import './BasketCard.css'
 import Button from '../button/Button.jsx'
 
-function BasketCard({ items, onSetQuantity, onRemove, vendors, vid, setVid, quote }) {
+function BasketCard({ items, onSetQuantity, onRemove, vendors, vid, setVid, quote, onPrintReceipt }) {
   const priced = new Map((quote?.lines ?? []).map((l) => [l.pid, l]));
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -65,7 +65,11 @@ function BasketCard({ items, onSetQuantity, onRemove, vendors, vid, setVid, quot
             <h1>{quote ? `$${quote.total.toFixed(2)}` : '$0.00'}</h1>
         </div>
         <div className="checkout-button">
-            <Button text="Print my receipt →" type="primary"/>
+            <Button
+                text="Print my receipt →"
+                type="primary"
+                onClick={onPrintReceipt}
+            />
         </div>
     </div>
   )
