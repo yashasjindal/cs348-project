@@ -1,0 +1,7 @@
+# Check these out with LF line endings on every OS, so the shell scripts run in WSL on Windows
+# and the .out files diff cleanly against fresh query output.
+*.sh   text eol=lf
+*.py   text eol=lf
+*.sql  text eol=lf
+*.out  text eol=lf
+*.csv  text eol=lf

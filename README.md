@@ -57,6 +57,8 @@ EXIT;
 ./db/reset.sh
 ```
 
+On Windows, run the shell scripts from WSL; see [Windows: running the shell scripts with WSL](#windows-running-the-shell-scripts-with-wsl).
+
 Successful output:
 ```
 Recreating database smartcart...
@@ -121,6 +123,8 @@ python3 db/production/build.py       # writes CSVs and build-report.txt to db/pr
 db/production/load.sh                # recreates smartcart_prod and loads the CSVs (about 20 seconds)
 ```
 
+On Windows, run these from WSL; see [Windows: running the shell scripts with WSL](#windows-running-the-shell-scripts-with-wsl).
+
 To point the app at production data, set `DB_NAME=smartcart_prod` in `backend/.env`.
 
 To regenerate `test-production.out`:
@@ -147,6 +151,130 @@ MYSQL_PWD=smartcart_dev mysql -u smartcart smartcart_prod -t -vvv --skip-comment
 | `db/production/load.sh` | Recreates `smartcart_prod` from `db/schema.sql` and bulk-loads the CSVs |
 | `db/test-production.sql` | The feature queries with production pids (first 10 rows where results are long) |
 | `db/test-production.out` | Output of `test-production.sql` on the production database |
+
+## Windows: running the shell scripts with WSL
+
+The scripts in `db/` (`reset.sh`, `production/download.sh`, `production/load.sh`) are bash scripts, so on Windows you run them in WSL (Windows Subsystem for Linux). Only the scripts run in Linux. MySQL, the repo and the app all stay on Windows: the scripts connect to your Windows MySQL over `127.0.0.1`, and the databases they create are ordinary databases on it, visible from Workbench and the app.
+
+This needs Windows 11 22H2 or newer (run `winver` to check), for the mirrored networking in step 3.
+
+### 1. Install Debian and make it the default distro
+
+In PowerShell, run as Administrator:
+
+```powershell
+wsl --install -d Debian    # installs WSL too if it isn't there yet; reboot if asked
+wsl --update               # mirrored networking needs WSL 2.0 or newer
+```
+
+When the Debian window opens for the first time, it asks for a Linux username and password. These are only for Debian (you type the password for `sudo`); they don't have to match your Windows login.
+
+If Docker Desktop is installed, `wsl -l -v` also lists a `docker-desktop` distro. That is Docker's internal VM, and it can't run these scripts. If it is the default (marked `*`), a bare `wsl` command opens it instead of Debian, so make Debian the default:
+
+```powershell
+wsl --set-default Debian
+wsl -l -v                  # Debian should have the *, and VERSION 2
+```
+
+Docker Desktop keeps working; it doesn't depend on the default distro.
+
+### 2. Install the tools the scripts need (inside Debian)
+
+Open Debian (Start menu → Debian, or run `wsl` in PowerShell) and run:
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl unzip python3 default-mysql-client
+```
+
+| Package | Used by |
+|---|---|
+| `curl`, `unzip` | `db/production/download.sh` |
+| `python3` | `db/production/build.py` |
+| `default-mysql-client` | the `mysql` command in `reset.sh`, `load.sh` and the test commands (Debian ships the MariaDB client under this name; it works with MySQL) |
+
+Don't install a MySQL server in Debian; you use the one on Windows. You don't need git in Debian either, because the repo stays where Windows git cloned it.
+
+Make the `mysql` command connect to Windows MySQL by default, so the commands in this README work unchanged:
+
+```bash
+printf '[client]\nhost=127.0.0.1\n' >> ~/.my.cnf
+```
+
+### 3. Let Debian reach MySQL on Windows (mirrored networking)
+
+By default, `127.0.0.1` inside WSL is the Linux VM, not Windows. Mirrored networking makes it point at Windows. In PowerShell:
+
+```powershell
+notepad "$env:USERPROFILE\.wslconfig"
+```
+
+Let Notepad create the file if it asks, add these two lines (keep anything already there), and save:
+
+```ini
+[wsl2]
+networkingMode=mirrored
+```
+
+Then restart WSL:
+
+```powershell
+wsl --shutdown
+```
+
+Check the connection from Debian:
+
+```bash
+MYSQL_PWD=smartcart_dev mysql -h 127.0.0.1 -u smartcart -e "SELECT VERSION(), @@local_infile"
+```
+
+This should print your Windows MySQL version. `@@local_infile` must be `1` before you run `load.sh`; if it is `0`, run the root setup in [Production database](#production-database).
+
+### 4. Check the line endings of your clone (one time)
+
+`.gitattributes` makes git check out the scripts, SQL and output files with Linux (LF) line endings. A clone made before `.gitattributes` was added may still have Windows (CRLF) endings, and then the scripts fail with `/usr/bin/env: 'bash\r': No such file or directory`. Check from Debian, in the repo folder:
+
+```bash
+head -1 db/reset.sh | od -c | tail -2
+```
+
+If the line ends in `\r  \n` instead of just `\n`, re-check out the files in PowerShell, in the repo folder. `git reset --hard` discards uncommitted changes, so commit or stash first if `git status` shows any:
+
+```powershell
+git status
+git rm --cached -r -q .
+git reset --hard
+```
+
+### 5. Run the scripts
+
+Your Windows drives appear in Debian under `/mnt`; for example, `C:\Users\you\cs348-project` is `/mnt/c/Users/you/cs348-project`.
+
+In VS Code, open a Debian terminal: click the **⌄** next to **+** in the terminal panel and choose **Debian (WSL)**. It opens in the repo folder. (Don't use the ▶ Run button or a PowerShell terminal; those run on Windows, without bash.) Then run the scripts as in the sections above:
+
+```bash
+bash db/reset.sh
+bash db/production/download.sh
+python3 db/production/build.py
+bash db/production/load.sh
+```
+
+To check that you are in Debian and the tools are installed:
+
+```bash
+grep PRETTY_NAME /etc/os-release && which curl unzip python3 mysql
+```
+
+### Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `wsl` opens something without `apt`, or `wsl -l -v` lists only `docker-desktop` | Debian isn't installed or isn't the default; see step 1. Or open it by name: `wsl -d Debian` |
+| `/usr/bin/env: 'bash\r': No such file or directory` | CRLF line endings; see step 4 |
+| `Can't connect to MySQL server on '127.0.0.1'` | Mirrored networking isn't on (step 3), or MySQL isn't running on Windows (Services app → the MySQL service, e.g. `MySQL97` → Start) |
+| `Can't connect to local server through socket` | The `mysql` command ran without `-h 127.0.0.1`; add the `~/.my.cnf` line from step 2 |
+| `local_infile is OFF on the server` | Run `SET PERSIST local_infile = 1;` as root on the Windows MySQL |
+| `mysql: command not found` | Install `default-mysql-client` (step 2), and check you are in Debian, not `docker-desktop` |
 
 ## Running the application
 
