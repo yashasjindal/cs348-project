@@ -1,8 +1,8 @@
 import React from 'react'
 import './ShopPage.css'
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { getVendors, quoteBasket, searchProducts } from '../api.js';
 import { useNavigate } from 'react-router-dom';
-import { getVendors, quoteBasket } from '../api.js';
 import Button from '../components/button/Button.jsx'
 import ProductCard from '../components/product_card/ProductCard.jsx'
 import BasketCard from '../components/basket_card/BasketCard.jsx'
@@ -11,6 +11,8 @@ import Filter from '../components/filter/Filter.jsx';
 
 function ShopPage() {
   const navigate = useNavigate();
+  const [q, setQ] = useState('');
+  const [error, setError] = useState('');
   const [results, setResults] = useState([]);
   const [items, setItems] = useState(() => {
   const savedBasket = localStorage.getItem('basket');

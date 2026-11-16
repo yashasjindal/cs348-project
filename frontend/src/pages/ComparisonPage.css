@@ -299,3 +299,17 @@
 .comparison-bottom-no-split {
     grid-template-columns: 1fr;
 }
+
+.comparison-empty {
+    text-align: center;
+    padding: 60px 20px;
+    min-height: 180px;
+}
+
+.comparison-empty h2 {
+    margin-bottom: 12px;
+}
+
+.comparison-empty p {
+    margin: 0;
+}
