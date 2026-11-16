@@ -278,14 +278,6 @@ function ComparisonPage() {
 
             </>}
 
-            {/* Action buttons
-            <div className="comparison-actions">
-                <Link to="/receipt" state={state} className="comparison-back">
-                    ← Back to my receipt
-                </Link>
-                <Link to="/shop">Edit my basket →</Link>
-            </div> */}
-
             {/* Footer */}
             <footer className="comparison-footer">
                 <p>
