@@ -73,6 +73,9 @@ Loading sample data...
 | Vendor              |    3 |
 | Sells               |   12 |
 | PriceHistory        |    9 |
+| User                |    2 |
+| Basket              |    2 |
+| BasketItem          |    5 |
 +---------------------+------+
 Done.
 ```
@@ -83,16 +86,17 @@ To use a different user/password, set `DB_USER` / `DB_PASSWORD` (and `DB_NAME`, 
 | File | Contents |
 |---|---|
 | `db/schema.sql` | `CREATE TABLE` statements with keys, foreign keys and `CHECK` constraints |
-| `db/sample-data.sql` | Hand-made sample rows (not real prices) |
+| `db/sample-data.sql` | Hand-made sample rows (not real prices), plus test accounts `alice` and `bob` (passwords `alice-sample-pw`, `bob-sample-pw`, stored as bcrypt hashes) |
 | `db/reset.sh` | Recreates the database, runs both files and prints a row count per table |
 | `db/test-sample.sql` | One sample query per feature |
 | `db/test-sample.out` | Output of `test-sample.sql` on the sample data |
 
-To regenerate `test-sample.out` after changing the queries or sample data:
+To regenerate `test-sample.out` after changing the queries or sample data (reset first: the sign-up query adds a user, and running it twice hits the unique username):
 
 ```bash
 ./db/reset.sh
 MYSQL_PWD=smartcart_dev mysql -u smartcart smartcart -t -vvv --skip-comments < db/test-sample.sql > db/test-sample.out
+./db/reset.sh
 ```
 
 To poke around: `mysql -u smartcart -p smartcart` (password `smartcart_dev`).
@@ -309,10 +313,13 @@ Open http://localhost:5173. The Vite dev server forwards `/api` requests to the 
 
 ### Features currently supported
 
-| Feature | Where | API |
-|---|---|---|
-| 1. Search and filter groceries by name, brand and category | `backend/src/routes/products.js`, `Search` in `frontend/src/App.jsx` | `GET /api/products?q=&brand=&category=` |
-| 2. Shopping basket: add/remove products, change quantities, see the estimated total at a chosen retailer | `backend/src/routes/basket.js`, `Basket` in `frontend/src/App.jsx` | `POST /api/basket/quote` |
+| Feature | Page | Where | API |
+|---|---|---|---|
+| 1. Search and filter groceries by name, brand and category | `/shop` | `backend/src/routes/products.js`, `frontend/src/pages/ShopPage.jsx` | `GET /api/products?q=&brand=&category=` |
+| 2. Shopping basket: add/remove products, change quantities, see the estimated total at a chosen retailer | `/shop` | `backend/src/routes/basket.js`, `frontend/src/pages/ShopPage.jsx` | `POST /api/basket/quote` |
+| 3. Receipt: itemized basket with totals and the gap between the cheapest and priciest store | `/receipt` | `frontend/src/pages/Receipt.jsx` (uses the compare API) | `POST /api/compare` |
+| 4. Compare the basket across retailers, with the cheapest store and the lowest price per product highlighted | `/compare` | `backend/src/routes/compare.js`, `frontend/src/pages/ComparisonPage.jsx` | `POST /api/compare` |
+| 5. User accounts (sign up, log in) | — | Tables `User`, `Basket`, `BasketItem` in `db/schema.sql`; queries in `db/test-sample.sql`. The app pages come in Milestone 3. | — |
 
 Supporting endpoints: `GET /api/products/filters` (brand and category lists), `GET /api/vendors`, `GET /api/health`.
 

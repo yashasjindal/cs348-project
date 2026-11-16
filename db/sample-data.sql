@@ -46,3 +46,19 @@ INSERT INTO PriceHistory (vid, pid, recorded_at, price) VALUES
     (1, 102, '2026-10-01 09:00:00', 4.29),
     (2, 104, '2026-09-01 09:00:00', 1.58),
     (2, 104, '2026-10-01 09:00:00', 1.48);
+
+-- Test accounts. The hashes are real bcrypt hashes (cost 10) of the test passwords
+-- 'alice-sample-pw' and 'bob-sample-pw'; never store real passwords in sample data.
+INSERT INTO User (uid, username, password_hash) VALUES
+    (1, 'alice', '$2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW'),
+    (2, 'bob',   '$2b$10$0VbmftAPKBBMl8MNAjrdQO67awD.2.qkA4rhD5/AFwiJRYkdEeT5m');
+
+-- Alice has two saved baskets; basket 1 holds the same items as the report's sample basket queries.
+-- Bob has none yet.
+INSERT INTO Basket (bid, uid, created_at, updated_at) VALUES
+    (1, 1, '2026-11-01 18:30:00', '2026-11-03 09:15:00'),
+    (2, 1, '2026-11-10 12:00:00', '2026-11-10 12:00:00');
+
+INSERT INTO BasketItem (bid, pid, quantity) VALUES
+    (1, 101, 1), (1, 102, 2), (1, 103, 1),
+    (2, 104, 3), (2, 107, 1);
