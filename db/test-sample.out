@@ -35,7 +35,7 @@ WHERE s.vid = 1
 | Large Eggs        |             2 |       4.29 |     8.58 |
 | White Bread       |             1 |       3.19 |     3.19 |
 +-------------------+---------------+------------+----------+
-3 rows in set (0.002 sec)
+3 rows in set (0.001 sec)
 
 --------------
 WITH BasketItems AS (
@@ -59,7 +59,7 @@ WHERE s.vid = 1
 | Large Eggs        |             1 |       4.29 |     4.29 |            4.50 |               4.50 |
 | White Bread       |             1 |       3.19 |     3.19 |            3.95 |               3.95 |
 +-------------------+---------------+------------+----------+-----------------+--------------------+
-3 rows in set (0.001 sec)
+3 rows in set (0.000 sec)
 
 --------------
 WITH BasketItems AS (
@@ -87,11 +87,35 @@ ORDER BY total_cost ASC
 3 rows in set (0.001 sec)
 
 --------------
+SELECT p.pid, p.name, p.quantity AS pack_quantity, p.unit, v.vid, v.name AS retailer, s.price,
+       MIN(s.price) OVER (PARTITION BY p.pid) AS lowest_price
+FROM Product p CROSS JOIN Vendor v
+     LEFT JOIN Sells s ON s.pid = p.pid AND s.vid = v.vid
+WHERE p.pid IN (101, 102, 103)
+ORDER BY p.pid, v.vid
+--------------
+
++-----+-------------------+---------------+------+-----+-----------+-------+--------------+
+| pid | name              | pack_quantity | unit | vid | retailer  | price | lowest_price |
++-----+-------------------+---------------+------+-----+-----------+-------+--------------+
+| 101 | Lactantia 2% Milk |         2.000 | L    |   1 | Walmart   |  5.29 |         5.29 |
+| 101 | Lactantia 2% Milk |         2.000 | L    |   2 | No Frills |  5.49 |         5.29 |
+| 101 | Lactantia 2% Milk |         2.000 | L    |   3 | Sobeys    |  5.99 |         5.29 |
+| 102 | Large Eggs        |        12.000 | ea   |   1 | Walmart   |  4.29 |         4.29 |
+| 102 | Large Eggs        |        12.000 | ea   |   2 | No Frills |  4.29 |         4.29 |
+| 102 | Large Eggs        |        12.000 | ea   |   3 | Sobeys    |  4.99 |         4.29 |
+| 103 | White Bread       |       675.000 | g    |   1 | Walmart   |  3.19 |         3.19 |
+| 103 | White Bread       |       675.000 | g    |   2 | No Frills |  3.19 |         3.19 |
+| 103 | White Bread       |       675.000 | g    |   3 | Sobeys    |  3.49 |         3.19 |
++-----+-------------------+---------------+------+-----+-----------+-------+--------------+
+9 rows in set (0.001 sec)
+
+--------------
 INSERT INTO User (username, password_hash)
 VALUES ('carol', '$2b$10$jmiqauwe9IxFHqtUCFIjI.BNTuBwI03DIx6Usrr3WQaRKo7idksHm')
 --------------
 
-Query OK, 1 row affected (0.002 sec)
+Query OK, 1 row affected (0.003 sec)
 
 --------------
 SELECT uid, username FROM User WHERE username = 'carol'

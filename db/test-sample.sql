@@ -51,6 +51,15 @@ GROUP BY v.vid, v.name
 HAVING COUNT(DISTINCT b.pid) = (SELECT COUNT(DISTINCT pid) FROM BasketItems)
 ORDER BY total_cost ASC;
 
+-- Feature 4, as the app runs it (backend/src/routes/compare.js): each basket product's price at
+-- every vendor, NULL where the vendor doesn't sell it. The app adds up each store's total from these rows.
+SELECT p.pid, p.name, p.quantity AS pack_quantity, p.unit, v.vid, v.name AS retailer, s.price,
+       MIN(s.price) OVER (PARTITION BY p.pid) AS lowest_price
+FROM Product p CROSS JOIN Vendor v
+     LEFT JOIN Sells s ON s.pid = p.pid AND s.vid = v.vid
+WHERE p.pid IN (101, 102, 103)
+ORDER BY p.pid, v.vid;
+
 -- Feature 5a: Create an account. The app hashes the password (bcrypt) before the INSERT;
 -- uid is generated. 'alice' and 'bob' already exist in the sample data, so sign up 'carol'
 -- (the hash is a real bcrypt hash of the test password 'carol-sample-pw').

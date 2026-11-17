@@ -1,0 +1,139 @@
+SmartCart production build, 2026-11-16 15:23
+Hammer price data through 2026-11-14; StatCan through 2026-09-01
+
+hammer listings: 196,489
+statcan items without a rule: []
+listings matching a name rule: 47,047
+dropped: matched more than one StatCan item: 78
+dropped: name matched but size did not: 34,294
+listings matched to exactly one StatCan item: 12,675
+UPCs seen at 2+ vendors: 1,528
+dropped: listing's UPC group matched a different StatCan item: 1
+price rows: for matched listings: 6,743,692
+price rows dropped: unparseable or multi-buy price: 165,392
+price rows dropped: bad date: 1
+price rows read: 80,411,080
+vendor listings dropped: no price in the last 30 days: 4,340
+daily prices dropped: outside the band around the StatCan benchmark (1/3x-3x produce and meat, 0.2x-5x packaged): 169,805
+vendor listings dropped: no usable prices: 399
+daily prices dropped: >3x from the listing's median (e.g. Walmart 100x): 10,494
+products dropped: no vendor left after price filtering: 4,581
+final: StatCan: 110
+final: StatCanPriceHistory: 12,870
+final: Vendor: 9
+final: Product: 5,762
+final: Sells: 7,260
+final: PriceHistory: 4,010,194
+final: products sold by 2+ vendors: 1,168
+
+Products per StatCan item:
+   336  Dry or fresh pasta, 500 grams
+   286  Cookies and sweet biscuits, 300 grams
+   267  Tea (20 bags)
+   263  Pasta sauce, 650 millilitres
+   234  Crackers and crisp breads, 200 grams
+   161  Apples, per kilogram
+   155  Roasted or ground coffee, 340 grams
+   150  Milk, 2 litres
+   145  Canned beans and lentils, 540 millilitres
+   143  Canned soup, 284 millilitres
+   135  Canned tuna, 170 grams
+   117  Eggs, 1 dozen
+   110  Block cheese, 500 grams
+   109  Cereal, 400 grams
+   109  Salad dressing, 475 millilitres
+    92  Milk, 4 litres
+    86  Canned tomatoes, 796 millilitres
+    84  Frozen pizza, 390 grams
+    83  Chicken breasts, per kilogram
+    79  Dry beans and legumes, 900 grams
+    76  Canned baked beans, 398 millilitres
+    74  Ground beef, per kilogram
+    74  Potatoes, per kilogram
+    73  Salsa, 418 millilitres
+    69  Milk, 1 litre
+    68  Hummus, 227 grams
+    67  Butter, 454 grams
+    67  Salmon, per kilogram
+    63  Pork loin cuts, per kilogram
+    63  Wieners, 400 grams
+    60  Mushrooms, 227 grams
+    58  Olive oil, 1 litre
+    54  Frozen french fried potatoes, 750 grams
+    54  Peanut butter, 1 kilogram
+    53  Salad greens, 142 grams
+    53  Yogurt, 500 grams
+    52  White rice, 2 kilograms
+    51  Chicken thigh, per kilogram
+    50  Onions, per kilogram
+    50  Peppers, per kilogram
+    49  Nut milk, 1.89 litres
+    48  Pork rib cuts, per kilogram
+    47  Almonds, 200 grams
+    47  Wheat flour, 2.5 kilograms
+    45  Beef striploin cuts, per kilogram
+    45  Flatbread and pita, 500 grams
+    44  Beef rib cuts, per kilogram
+    44  Squash, per kilogram
+    43  Cream, 1 litre
+    40  Mayonnaise, 890 millilitres
+    34  Sweet potatoes, per kilogram
+    32  Dried lentils, 900 grams
+    31  Canned corn, 341 millilitres
+    30  Soy milk, 1.89 litres
+    28  Beef top sirloin cuts, per kilogram
+    28  Chicken drumsticks, per kilogram
+    28  Frozen mixed vegetables, 750 grams
+    28  Potatoes, 4.54 kilograms
+    28  White bread, 675 grams
+    27  Onions, 1.36 kilograms
+    27  Shrimp, 300 grams
+    27  Tomatoes, per kilogram
+    25  Vegetable oil, 3 litres
+    25  Whole chicken, per kilogram
+    23  Pork shoulder cuts, per kilogram
+    22  Canned salmon, 213 grams
+    21  Apple juice, 2 litres
+    21  Beef stewing cuts, per kilogram
+    21  Canned peach, 398 millilitres
+    21  Oranges, per kilogram
+    19  Bacon, 500 grams
+    19  Cabbage, per kilogram
+    18  Frozen strawberries, 600 grams
+    16  Pears, per kilogram
+    16  Strawberries, 454 grams
+    15  Canned pear, 398 millilitres
+    14  Baby food, 128 millilitres
+    14  Broccoli, unit
+    14  Brown rice, 900 grams
+    14  Canola oil, 3 litres
+    14  Frozen peas, 750 grams
+    14  Tofu, 350 grams
+    13  Frozen broccoli, 500 grams
+    12  Iceberg lettuce, unit
+    12  Ketchup, 1 litre
+    12  Romaine lettuce, unit
+    11  Deodorant, 85 grams
+    11  Frozen corn, 750 grams
+    11  Margarine, 907 grams
+    11  Toothpaste, 100 millilitres
+    10  Celery, unit
+    10  Grapes, per kilogram
+    10  Oranges, 1.36 kilograms
+     9  Frozen green beans, 750 grams
+     8  Bananas, per kilogram
+     8  Cantaloupe, unit
+     8  Cucumber, unit
+     8  Meatless burgers, 226 grams
+     7  Avocado, unit
+     7  Peanuts, 450 grams
+     7  Sunflower seeds, 400 grams
+     6  Laundry detergent, 4.43 litres
+     6  White sugar, 2 kilograms
+     5  Carrots, 1.36 kilograms
+     5  Lemons, unit
+     5  Shampoo, 400 millilitres
+     4  Frozen spinach, 300 grams
+     4  Limes, unit
+     2  Orange juice, 2 litres
+     1  Infant formula, 900 grams

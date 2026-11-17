@@ -157,7 +157,7 @@ The script discards result rows and reads only its own session's timings. Printi
 
 ### How the data is cleaned
 
-`build.py` makes these decisions; `build-report.txt` counts the rows affected by each one.
+`build.py` makes these decisions; `build-report.txt` counts the rows affected by each one. The report for the 2026-11-14 snapshot is committed as `db/production/build-report.txt`.
 
 - **Matching to StatCan.** Each product must match exactly one StatCan item (`Product.sid` is `NOT NULL`). `statcan_rules.csv` gives each item a name pattern, words to exclude and a category. Packaged items must also be within 10% of the StatCan package size; for example, "Butter, 454 grams" accepts 409–499 g. Listings that match no item, or more than one, are dropped.
 - **Per-kilogram and per-unit items.** Produce and meat that StatCan prices per kilogram are stored as 1 kg, using the store's per-weight price. Items priced per unit (avocado, lemons) must be sold singly.
@@ -172,6 +172,7 @@ The script discards result rows and reads only its own session's timings. Printi
 | `db/production/statcan_rules.csv` | Name patterns that match grocery listings to StatCan items |
 | `db/production/load.sh` | Recreates `smartcart_prod` from `db/schema.sql` and bulk-loads the CSVs |
 | `db/production/measure.sh` | Query plans, timings and before/after index experiments for each feature (R-c) |
+| `db/production/build-report.txt` | `build.py`'s row counts for the 2026-11-14 snapshot (the numbers quoted in the report) |
 | `db/test-production.sql` | The feature queries with production pids (first 10 rows where results are long) |
 | `db/test-production.out` | Output of `test-production.sql` on the production database |
 
@@ -324,7 +325,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The Vite dev server forwards `/api` requests to the backend, so start the backend first.
+Open http://localhost:5173/shop. The Vite dev server forwards `/api` requests to the backend, so start the backend first. (The root URL still shows the Milestone 1 page.)
 
 ### Features currently supported
 
@@ -332,7 +333,7 @@ Open http://localhost:5173. The Vite dev server forwards `/api` requests to the 
 |---|---|---|---|
 | 1. Search and filter groceries by name, brand and category | `/shop` | `backend/src/routes/products.js`, `frontend/src/pages/ShopPage.jsx` | `GET /api/products?q=&brand=&category=` |
 | 2. Shopping basket: add/remove products, change quantities, see the estimated total at a chosen retailer | `/shop` | `backend/src/routes/basket.js`, `frontend/src/pages/ShopPage.jsx` | `POST /api/basket/quote` |
-| 3. Receipt: itemized basket with totals and the gap between the cheapest and priciest store | `/receipt` | `frontend/src/pages/Receipt.jsx` (uses the compare API) | `POST /api/compare` |
+| 3. Receipt with a Canadian benchmark: itemized basket, total, each item's Statistics Canada average, and how far the basket is above or below the Canadian average | `/receipt` | `backend/src/routes/basket.js`, `frontend/src/pages/Receipt.jsx` | `POST /api/basket/receipt` |
 | 4. Compare the basket across retailers, with the cheapest store and the lowest price per product highlighted | `/compare` | `backend/src/routes/compare.js`, `frontend/src/pages/ComparisonPage.jsx` | `POST /api/compare` |
 | 5. User accounts (sign up, log in) | — | Tables `User`, `Basket`, `BasketItem` in `db/schema.sql`; queries in `db/test-sample.sql`. The app pages come in Milestone 3. | — |
 
