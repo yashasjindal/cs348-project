@@ -17,7 +17,7 @@ UNION ALL SELECT 'PriceHistory', COUNT(*) FROM PriceHistory
 | Sells               |    7260 |
 | PriceHistory        | 4010194 |
 +---------------------+---------+
-6 rows in set (0.090 sec)
+6 rows in set (0.180 sec)
 
 --------------
 SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category, s.price, r.name AS retailer
@@ -67,7 +67,7 @@ LIMIT 10
 | 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  6.99 | Sobeys        |
 | 7312 | Crunchy Peanut Butter | Jif   |    1.000 | kg   | Pantry   |  7.49 | Voila         |
 +------+-----------------------+-------+----------+------+----------+-------+---------------+
-10 rows in set (0.003 sec)
+10 rows in set (0.002 sec)
 
 --------------
 WITH BasketItems AS (
@@ -143,11 +143,53 @@ ORDER BY total_cost ASC
 5 rows in set (0.000 sec)
 
 --------------
+SELECT p.pid, p.name, p.quantity AS pack_quantity, p.unit, v.vid, v.name AS retailer, s.price,
+       MIN(s.price) OVER (PARTITION BY p.pid) AS lowest_price
+FROM Product p CROSS JOIN Vendor v
+     LEFT JOIN Sells s ON s.pid = p.pid AND s.vid = v.vid
+WHERE p.pid IN (5602, 7312, 1887)
+ORDER BY p.pid, v.vid
+--------------
+
++------+-----------------------+---------------+------+-----+-----------------+-------+--------------+
+| pid  | name                  | pack_quantity | unit | vid | retailer        | price | lowest_price |
++------+-----------------------+---------------+------+-----+-----------------+-------+--------------+
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   1 | Galleria        |  3.19 |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   2 | Loblaws         |  NULL |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   3 | Metro           |  1.99 |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   4 | No Frills       |  NULL |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   5 | Save-On-Foods   |  3.69 |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   6 | Sobeys          |  3.19 |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   7 | T&T Supermarket |  NULL |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   8 | Voila           |  3.29 |         1.99 |
+| 1887 | Diced Tomatoes        |       796.000 | mL   |   9 | Walmart         |  NULL |         1.99 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   1 | Galleria        |  7.99 |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   2 | Loblaws         |  NULL |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   3 | Metro           |  6.49 |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   4 | No Frills       |  NULL |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   5 | Save-On-Foods   |  5.99 |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   6 | Sobeys          |  5.79 |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   7 | T&T Supermarket |  NULL |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   8 | Voila           |  6.49 |         5.79 |
+| 5602 | Tomato Ketchup        |         1.000 | L    |   9 | Walmart         |  NULL |         5.79 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   1 | Galleria        |  9.99 |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   2 | Loblaws         |  NULL |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   3 | Metro           |  5.99 |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   4 | No Frills       |  NULL |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   5 | Save-On-Foods   |  5.49 |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   6 | Sobeys          |  6.99 |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   7 | T&T Supermarket |  NULL |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   8 | Voila           |  7.49 |         5.49 |
+| 7312 | Crunchy Peanut Butter |         1.000 | kg   |   9 | Walmart         |  7.87 |         5.49 |
++------+-----------------------+---------------+------+-----+-----------------+-------+--------------+
+27 rows in set (0.000 sec)
+
+--------------
 INSERT INTO User (username, password_hash)
 VALUES ('alice', '$2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW')
 --------------
 
-Query OK, 1 row affected (0.003 sec)
+Query OK, 1 row affected (0.001 sec)
 
 --------------
 SELECT uid, username, password_hash FROM User WHERE username = 'alice'
@@ -156,7 +198,7 @@ SELECT uid, username, password_hash FROM User WHERE username = 'alice'
 +-----+----------+--------------------------------------------------------------+
 | uid | username | password_hash                                                |
 +-----+----------+--------------------------------------------------------------+
-|   1 | alice    | $2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW |
+|   5 | alice    | $2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW |
 +-----+----------+--------------------------------------------------------------+
 1 row in set (0.000 sec)
 
@@ -164,7 +206,7 @@ SELECT uid, username, password_hash FROM User WHERE username = 'alice'
 DELETE FROM User WHERE username = 'alice'
 --------------
 
-Query OK, 1 row affected (0.001 sec)
+Query OK, 1 row affected (0.002 sec)
 
 --------------
 SELECT p.pid, p.name, p.brand, p.quantity, p.unit, COUNT(*) AS retailers
@@ -188,6 +230,6 @@ LIMIT 10
 | 9826 | Corn Oil                       | Mazola        |    2.840 | L    |         6 |
 | 1346 | Black Beans                    | UNICO         |  540.000 | mL   |         5 |
 +------+--------------------------------+---------------+----------+------+-----------+
-10 rows in set (0.013 sec)
+10 rows in set (0.012 sec)
 
 Bye
