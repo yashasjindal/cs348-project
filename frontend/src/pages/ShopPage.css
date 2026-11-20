@@ -1,10 +1,18 @@
+.shop-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
 .shop-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  gap: 32px;
-  margin-bottom: 24px;
+  gap: 24px;
+  margin-bottom: 16px;
 }
 
 .shop-nav {
@@ -15,6 +23,8 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  width: max-content;
+  white-space: nowrap;
 }
 
 .shop-divider {
@@ -33,12 +43,10 @@
 }
 
 .shop-terminal {
-  width: 1344px;
+  width: 100%;
   min-height: 748px;
-  gap: 12px;
-  opacity: 1;
+  box-sizing: border-box;
   border-radius: 24px;
-  border-width: 3px;
   padding: 20px;
   background: transparent;
   border: 3px solid var(--color-ink, #203C34);
@@ -47,8 +55,8 @@
 
 .shop-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto auto auto auto;
+  grid-template-columns: minmax(0, 1.8fr) minmax(350px, 1fr);
+  grid-template-rows: auto auto auto 1fr;
   align-content: start;
   column-gap: 24px;
   row-gap: 16px;
@@ -66,6 +74,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-content: start;
+  width: 100%;
+  min-width: 0;
 }
 
 .shop-terminal-header {
@@ -100,9 +110,10 @@
 }
 
 .basket {
-    grid-column: 2;
-    grid-row: 1 / 5;
-    min-width: 0;
+  grid-column: 2;
+  grid-row: 1 / 5;
+  min-width: 0;
+  width: 100%;
 }
 
 .no-products {
@@ -115,6 +126,7 @@
 }
 
 .results {
-    grid-column: 1;
-    grid-row: 4;
+  grid-column: 1;
+  grid-row: 4;
+  min-width: 0;
 }
