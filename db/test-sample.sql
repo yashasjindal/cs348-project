@@ -63,10 +63,16 @@ ORDER BY p.pid, v.vid;
 -- Feature 5a: Create an account. The app hashes the password (bcrypt) before the INSERT;
 -- uid is generated. 'alice' and 'bob' already exist in the sample data, so sign up 'carol'
 -- (the hash is a real bcrypt hash of the test password 'carol-sample-pw').
+-- The app creates the user's one basket in the same transaction.
+START TRANSACTION;
 INSERT INTO User (username, password_hash)
 VALUES ('carol', '$2b$10$jmiqauwe9IxFHqtUCFIjI.BNTuBwI03DIx6Usrr3WQaRKo7idksHm');
+INSERT INTO Basket (uid) VALUES (LAST_INSERT_ID());
+COMMIT;
 
-SELECT uid, username FROM User WHERE username = 'carol';
+SELECT u.uid, u.username, b.bid
+FROM User u JOIN Basket b ON b.uid = u.uid
+WHERE u.username = 'carol';
 
 -- Feature 5b: Log in. The app fetches the stored hash by username and checks the typed
 -- password against it; a username with no row means "wrong username or password".

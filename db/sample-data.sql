@@ -53,11 +53,10 @@ INSERT INTO User (uid, username, password_hash) VALUES
     (1, 'alice', '$2b$10$WZFKudfjvIr3qdKudJbuFu63QDBzokqxSlDk.6NmSj3tEVQSDb.ZW'),
     (2, 'bob',   '$2b$10$0VbmftAPKBBMl8MNAjrdQO67awD.2.qkA4rhD5/AFwiJRYkdEeT5m');
 
--- Alice has two saved baskets; basket 1 holds the same items as the report's sample basket queries.
--- Bob has none yet.
+-- One basket per user. Alice's (basket 1) holds the same items as the report's sample basket queries.
 INSERT INTO Basket (bid, uid, created_at, updated_at) VALUES
     (1, 1, '2026-11-01 18:30:00', '2026-11-03 09:15:00'),
-    (2, 1, '2026-11-10 12:00:00', '2026-11-10 12:00:00');
+    (2, 2, '2026-11-10 12:00:00', '2026-11-10 12:00:00');
 
 INSERT INTO BasketItem (bid, pid, quantity) VALUES
     (1, 101, 1), (1, 102, 2), (1, 103, 1),

@@ -104,7 +104,8 @@ CREATE TABLE User (
     CONSTRAINT chk_user_username CHECK (CHAR_LENGTH(TRIM(username)) > 0)
 );
 
--- A saved shopping basket. A user can keep several baskets.
+-- A user's shopping basket. Each user has exactly one: UNIQUE (uid) allows at most one, and the
+-- app creates it in the same transaction as the User row (backend/src/routes/auth.js).
 -- updated_at changes automatically when the Basket row is updated; the app also touches it
 -- when the basket's items change, since those are rows in BasketItem.
 CREATE TABLE Basket (
@@ -113,7 +114,8 @@ CREATE TABLE Basket (
     created_at  DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (bid),
-    -- Deleting an account deletes its baskets.
+    CONSTRAINT uq_basket_user UNIQUE (uid),
+    -- Deleting an account deletes its basket.
     CONSTRAINT fk_basket_user FOREIGN KEY (uid) REFERENCES User (uid) ON DELETE CASCADE,
     CONSTRAINT chk_basket_times CHECK (updated_at >= created_at)
 );
