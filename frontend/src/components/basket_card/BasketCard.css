@@ -1,14 +1,34 @@
 .basket-card {
-    width: 440;
-    height: 580;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     border-radius: 8px;
-    border-width: 1px;
-    padding: space/24;
-    gap: 16;
-    opacity: 1;
     background: var(--color-cream, #F3EAD5);
     border: 1px solid var(--color-line, #BAC6AD);
     padding: 24px;
+    gap: 8px;
+}
+
+.basket-products {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.basket-card > :not(.basket-products) {
+    flex-shrink: 0;
+}
+
+.basket-card hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid var(--color-line, #BAC6AD);
+    margin: 0;
+    flex-shrink: 0;
 }
 
 .basket-card-header {

@@ -56,7 +56,8 @@
 .shop-content {
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) minmax(350px, 1fr);
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr auto;
+  align-items: stretch;
   align-content: start;
   column-gap: 24px;
   row-gap: 16px;
@@ -111,9 +112,16 @@
 
 .basket {
   grid-column: 2;
-  grid-row: 1 / 5;
+  grid-row: 1 / 6;
   min-width: 0;
+  min-height: 0;
   width: 100%;
+  position: relative;
+}
+
+.basket > .basket-card {
+  position: absolute;
+  inset: 0;
 }
 
 .no-products {

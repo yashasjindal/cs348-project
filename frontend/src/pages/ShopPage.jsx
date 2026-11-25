@@ -205,28 +205,28 @@ function ShopPage() {
               ))}
               </div>
             )}
+            {hasSearched && totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  disabled={page <= 1 || loading}
+                  onClick={() => handleSearch(page - 1, submittedQ)}
+                >
+                  ← Previous
+                </button>
+
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+
+                <button
+                  disabled={page >= totalPages || loading}
+                  onClick={() => handleSearch(page + 1, submittedQ)}
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
-          {hasSearched && totalPages > 1 && (
-            <div className="pagination">
-              <button
-                disabled={page <= 1 || loading}
-                onClick={() => handleSearch(page - 1, submittedQ)}
-              >
-                ← Previous
-              </button>
-
-              <span>
-                Page {page} of {totalPages}
-              </span>
-
-              <button
-                disabled={page >= totalPages || loading}
-                onClick={() => handleSearch(page + 1, submittedQ)}
-              >
-                Next →
-              </button>
-            </div>
-          )}
           <div className="basket">
             <BasketCard 
               items={items}
