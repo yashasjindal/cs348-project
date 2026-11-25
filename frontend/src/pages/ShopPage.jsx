@@ -19,7 +19,10 @@ function ShopPage() {
     return savedBasket ? JSON.parse(savedBasket) : [];
   });
   const [vendors, setVendors] = useState([]);
-  const [vid, setVid] = useState(null);
+  const [vid, setVid] = useState(() => {
+    const savedVendor = localStorage.getItem('selectedVendor');
+    return savedVendor ? JSON.parse(savedVendor) : null;
+  });
   const [quote, setQuote] = useState(null);
   const [brand, setBrand] = useState('');
   const [category, setCategory] = useState('');
@@ -75,10 +78,21 @@ function ShopPage() {
     getVendors()
       .then((rows) => {
         setVendors(rows);
-        if (rows.length) setVid(rows[0].vid);
+
+        setVid((prev) => {
+          if (rows.some((vendor) => vendor.vid === prev)) {
+            return prev;
+          }
+
+          return rows.length ? rows[0].vid : null;
+        });
       })
       .catch((e) => setError(e.message));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('selectedVendor', JSON.stringify(vid));
+  }, [vid]);
 
   useEffect(() => {
     if (!vid || items.length === 0) {
