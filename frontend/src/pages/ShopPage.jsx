@@ -48,8 +48,6 @@ function ShopPage() {
         page: requestedPage
       });
 
-      console.log('API response:', data);
-
       if (requestId !== searchRequest.current) return;
 
       setResults(data.products);
