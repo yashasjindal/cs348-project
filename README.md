@@ -341,6 +341,8 @@ Open http://localhost:5173/shop. The Vite dev server forwards `/api` requests to
 
 Supporting endpoints: `GET /api/products/filters` (brand and category lists), `GET /api/vendors`, `GET /api/health`.
 
+Every endpoint except `GET /api/health` and the account endpoints below needs a login. A logged-out request gets `401 { "error": "log in or sign up to <feature>", "loginRequired": true }`, for example `log in or sign up to compare prices across stores`; the `api.js` wrappers throw an error with `err.loginRequired` set, so a page can show the message and send the visitor to log in.
+
 The account endpoints take and return JSON, and the login is a session cookie the browser sends by itself:
 
 | Endpoint | Body | Success | Errors |

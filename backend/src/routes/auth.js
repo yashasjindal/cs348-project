@@ -105,7 +105,7 @@ router.get('/me', async (req, res) => {
 // Delete the logged-in account. Asks for the password again so a session left open on a shared
 // computer can't be used to delete the account. ON DELETE CASCADE removes the basket and items.
 // DELETE /api/account   body: { "password": "..." }
-router.delete('/account', requireAuth, async (req, res) => {
+router.delete('/account', requireAuth('delete your account'), async (req, res) => {
   const { password } = req.body ?? {};
   if (typeof password !== 'string') {
     return res.status(400).json({ error: 'password is required to delete the account' });

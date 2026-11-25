@@ -3,7 +3,13 @@
 async function request(path, options) {
   const res = await fetch(path, options);
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error ?? `Request failed (${res.status})`);
+  if (!res.ok) {
+    // err.loginRequired is true when the visitor needs to log in (or sign up) to use that feature.
+    const err = new Error(body.error ?? `Request failed (${res.status})`);
+    err.status = res.status;
+    err.loginRequired = body.loginRequired === true;
+    throw err;
+  }
   return body;
 }
 

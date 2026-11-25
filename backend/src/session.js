@@ -32,8 +32,14 @@ export function endSession(req, res) {
   });
 }
 
-// For routes that act on the logged-in user's data (their basket, their account).
-export function requireAuth(req, res, next) {
-  if (!req.session.uid) return res.status(401).json({ error: 'log in first' });
-  next();
+// Every shop feature needs a login. requireAuth('compare stores') rejects a logged-out request with
+// 401 { error: 'log in or sign up to compare stores', loginRequired: true }, so the app can show
+// the message and send the visitor to the login page.
+export function requireAuth(action) {
+  return (req, res, next) => {
+    if (!req.session.uid) {
+      return res.status(401).json({ error: `log in or sign up to ${action}`, loginRequired: true });
+    }
+    next();
+  };
 }
