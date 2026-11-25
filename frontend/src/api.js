@@ -7,8 +7,8 @@ async function request(path, options) {
   return body;
 }
 
-export function searchProducts({ q, brand, category }) {
-  const params = new URLSearchParams({ q, brand, category });
+export function searchProducts({ q, brand, category, page = 1 }) {
+  const params = new URLSearchParams({ q, brand, category, page });
   return request(`/api/products?${params}`);
 }
 

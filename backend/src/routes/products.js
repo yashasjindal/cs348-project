@@ -19,19 +19,50 @@ router.get('/', async (req, res) => {
   const brand = optional(req.query.brand);
   const category = optional(req.query.category);
 
+  // pagination logic
+  const page = Number(req.query.page ?? 1);
+  const limit = 4;
+
+  if (!Number.isSafeInteger(page) || page < 1) {
+    return res.status(400).json({ error: 'Invalid page number' });
+  }
+
+  const offset = (page - 1) * limit;
+
+  const conditions = `
+    FROM Product p
+    JOIN Sells s ON s.pid = p.pid
+    JOIN Vendor v ON v.vid = s.vid
+    WHERE p.name LIKE CONCAT('%', ?, '%')
+      AND (? IS NULL OR p.brand = ?)
+      AND (? IS NULL OR p.category = ?)
+  `;
+
+  const params = [escapeLike(q), brand, brand, category, category,];
+
   const [rows] = await pool.execute(
     `SELECT p.pid, p.name, p.brand, p.quantity, p.unit, p.category,
             v.vid, v.name AS vendor, s.price
-     FROM Product p
-     JOIN Sells s ON s.pid = p.pid
-     JOIN Vendor v ON v.vid = s.vid
-     WHERE p.name LIKE CONCAT('%', ?, '%')
-       AND (? IS NULL OR p.brand = ?)
-       AND (? IS NULL OR p.category = ?)
-     ORDER BY p.name, s.price`,
-    [escapeLike(q), brand, brand, category, category],
+     ${conditions}
+     ORDER BY p.name, s.price
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset],
   );
-  res.json(rows);
+
+  const [countRows] = await pool.execute(
+    `SELECT COUNT(*) AS total
+     ${conditions}`,
+    params
+  );
+
+  const total = Number(countRows[0].total);
+
+  res.json({
+    products: rows,
+    page,
+    total,
+    totalPages: Math.ceil(total / limit)
+  });
 });
 
 // Values for the brand and category drop-downs.
