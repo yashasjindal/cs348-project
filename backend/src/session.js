@@ -1,4 +1,5 @@
 import session from 'express-session';
+import { pool } from './db.js';
 
 // Logins are kept in a server-side session; the browser only holds the session id in a cookie.
 // The Vite dev server proxies /api to this server, so the cookie is same-origin and needs no CORS.
@@ -35,9 +36,14 @@ export function endSession(req, res) {
 // Every shop feature needs a login. requireAuth('compare stores') rejects a logged-out request with
 // 401 { error: 'log in or sign up to compare stores', loginRequired: true }, so the app can show
 // the message and send the visitor to the login page.
+// The account is looked up too, so a session whose account was deleted elsewhere (another
+// browser) is logged out instead of acting on a uid that no longer exists.
 export function requireAuth(action) {
-  return (req, res, next) => {
-    if (!req.session.uid) {
+  return async (req, res, next) => {
+    const { uid } = req.session;
+    const [rows] = uid ? await pool.execute('SELECT 1 FROM User WHERE uid = ?', [uid]) : [[]];
+    if (rows.length === 0) {
+      if (uid) await endSession(req, res);
       return res.status(401).json({ error: `log in or sign up to ${action}`, loginRequired: true });
     }
     next();
