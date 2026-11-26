@@ -1,0 +1,135 @@
+.login-page {
+  max-width: 1344px;
+  padding: 12px 0 64px;
+}
+
+.login-brand,
+.login-headline,
+.login-form h1,
+.login-receipt h2 {
+  font-family: 'VT323', monospace;
+  font-weight: 400;
+}
+
+.login-brand {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.login-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 524fr) minmax(0, 820fr);
+  align-items: center;
+  margin-top: 72px;
+}
+
+.login-welcome {
+  box-sizing: border-box;
+  min-height: 714px;
+  padding: clamp(24px, 3vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: var(--color-mint, #e4ecd9);
+  border: 2px solid var(--color-ink, #203c34);
+  border-radius: 20px;
+  color: var(--color-muted, #607266);
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.login-page p { margin: 0; }
+
+.login-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.login-headline,
+.login-form h1 {
+  color: var(--color-ink, #203c34);
+  font-size: clamp(38px, 4.45vw, 64px);
+  line-height: 1;
+}
+
+.login-receipt {
+  box-sizing: border-box;
+  min-height: 282px;
+  padding: 24px 28px;
+  transform: rotate(2deg);
+  border: 1px solid var(--color-line, #bac6ad);
+  border-radius: 4px;
+  background: var(--color-paper, #fffcf2);
+  color: var(--color-ink, #203c34);
+  font: 14px/1.2 'Courier Prime', monospace;
+}
+
+.login-receipt h2 {
+  margin: 0;
+  color: inherit;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.login-receipt ol {
+  max-width: 32ch;
+  margin: 12px 0;
+  padding: 16px 0 16px 3ch;
+  border-block: 1px dashed var(--color-muted, #607266);
+  list-style: decimal-leading-zero;
+  font-size: 16px;
+}
+
+.login-receipt li + li { margin-top: 12px; }
+
+.login-form {
+  position: relative;
+  display: grid;
+  gap: 24px;
+  width: min(512px, 85%);
+  margin: 0 auto 38px;
+}
+
+.login-form h1 { margin: 0; }
+.login-form > p { font-size: 18px; }
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+  padding-bottom: 8px;
+}
+
+.login-form input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 56px;
+  padding: 0 16px;
+  border-color: var(--color-line, #bac6ad);
+  background: var(--color-paper, #fffcf2);
+  color: inherit;
+  font: 18px 'Courier Prime', monospace;
+}
+
+.login-form input::placeholder { color: inherit; }
+
+.login-form .searchButton {
+  width: 100%;
+  height: 60px;
+}
+
+.login-form .login-status {
+  position: absolute;
+  top: calc(100% + 12px);
+  font-size: 14px;
+}
+
+@media (max-width: 850px) {
+  .login-page { padding-inline: 12px; }
+  :root:has(.login-page) { margin-inline: 12px; }
+  .login-layout { grid-template-columns: 1fr; gap: 42px; margin-top: 32px; }
+  .login-form { grid-row: 1; width: min(100%, 512px); }
+  .login-welcome { min-height: auto; }
+  .login-receipt { min-height: auto; padding: 20px; }
+}
