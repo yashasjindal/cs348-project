@@ -28,27 +28,32 @@ function ShopPage() {
   const [category, setCategory] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const searchRequest = useRef(0);
-  const firstFilterRender = useRef(true);
+  const previousFilters = useRef({ brand, category });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [submittedQ, setSubmittedQ] = useState('');
 
-  const handleSearch = async () => {
+  const handleSearch = async (requestedPage = 1, searchQuery = q) => {
     const requestId = ++searchRequest.current;
 
     setLoading(true);
     setError('');
 
     try {
-      const rows = await searchProducts({
-        q,
+      const data = await searchProducts({
+        q: searchQuery,
         brand,
-        category
+        category,
+        page: requestedPage
       });
 
-      // Ignore an older request if a newer one has started
       if (requestId !== searchRequest.current) return;
 
-      setResults(rows);
+      setResults(data.products);
+      setPage(data.page);
+      setTotalPages(data.totalPages);
+      setSubmittedQ(searchQuery);
       setHasSearched(true);
 
     } catch (e) {
@@ -56,6 +61,8 @@ function ShopPage() {
 
       setError(e.message);
       setResults([]);
+      setPage(1);
+      setTotalPages(0);
       setHasSearched(true);
 
     } finally {
@@ -66,12 +73,13 @@ function ShopPage() {
   };
 
   useEffect(() => {
-    if (firstFilterRender.current) {
-      firstFilterRender.current = false;
+    if (previousFilters.current.brand === brand && previousFilters.current.category === category) {
       return;
     }
 
-    handleSearch();
+    previousFilters.current = { brand, category };
+
+    handleSearch(1);
   }, [brand, category]);
 
   useEffect(() => {
@@ -154,7 +162,7 @@ function ShopPage() {
           <SearchBar
             q={q}
             setQ={setQ}
-            onSearch={handleSearch}
+            onSearch={() => handleSearch(1)}
           />
           <Filter 
             brand={brand}
@@ -195,6 +203,27 @@ function ShopPage() {
                   onClick={() => add(r)}
                 />
               ))}
+              </div>
+            )}
+            {hasSearched && totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  disabled={page <= 1 || loading}
+                  onClick={() => handleSearch(page - 1, submittedQ)}
+                >
+                  ← Previous
+                </button>
+
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+
+                <button
+                  disabled={page >= totalPages || loading}
+                  onClick={() => handleSearch(page + 1, submittedQ)}
+                >
+                  Next →
+                </button>
               </div>
             )}
           </div>

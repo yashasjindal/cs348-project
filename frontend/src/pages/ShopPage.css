@@ -56,7 +56,8 @@
 .shop-content {
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) minmax(350px, 1fr);
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr auto;
+  align-items: stretch;
   align-content: start;
   column-gap: 24px;
   row-gap: 16px;
@@ -111,22 +112,67 @@
 
 .basket {
   grid-column: 2;
-  grid-row: 1 / 5;
+  grid-row: 1 / 6;
   min-width: 0;
+  min-height: 0;
   width: 100%;
+  position: relative;
+}
+
+.basket > .basket-card {
+  position: absolute;
+  inset: 0;
 }
 
 .no-products {
-  width: 788;
-  height: 316;
-  gap: 16;
-  opacity: 1;
-  padding: 54px 40px;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   background: var(--color-mint, #E4ECD9);
 }
 
 .results {
-  grid-column: 1;
-  grid-row: 4;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 16px 0 24px;
+}
+
+.pagination button {
+  background: transparent;
+  border: 1px solid #2a3d2e;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #2a3d2e;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #2a3d2e;
+  color: white;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #607266;
 }
