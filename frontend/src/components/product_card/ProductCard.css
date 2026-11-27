@@ -24,13 +24,46 @@
     text-align: left;
 }
 
-.product-name {
+.product-card .product-name {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+
     font-weight: 400;
-    font-style: Regular;
     font-size: 14px;
     line-height: 120%;
-    letter-spacing: 0%;
-    margin: 0px;
+    white-space: nowrap;
+}
+
+.product-name-text {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-separator {
+    flex: 0 0 auto;
+    margin: 0 5px;
+}
+
+.product-size {
+    display: block;
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: 30%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .product-price {
@@ -48,6 +81,7 @@
 .product-price-add {
     display: flex;
     align-items: center;
+    margin-top: 16px;
 }
 
 /* Price with the store under it, so the card keeps its height. */
