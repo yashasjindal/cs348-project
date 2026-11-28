@@ -1,7 +1,7 @@
 import React from 'react'
 import './Button.css'
 
-function Button({ text, type, disabled = false, onClick }) {
+function Button({ text, type, disabled = false, onClick, htmlType }) {
   let buttonStyle;
 
   if (type === 'current') {
@@ -23,6 +23,7 @@ function Button({ text, type, disabled = false, onClick }) {
   return (
     <button
         className={`custom-button ${buttonStyle}`}
+        type={htmlType}
         disabled={disabled}
         onClick={onClick}
     >{text}</button>
