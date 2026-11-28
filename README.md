@@ -309,11 +309,13 @@ Requires Node.js 20 or newer, and the database from the steps above.
 ```bash
 cd backend
 npm install
-cp .env.example .env    # database connection settings; edit if yours differ
+cp .env.example .env    # database settings and SESSION_SECRET; edit if yours differ
 npm start               # or `npm run dev` to restart on file changes
 ```
 
 Check it with `curl localhost:3001/api/health`, which should print `{"status":"ok","products":5}`.
+
+Logins are kept in server memory, so restarting the backend logs everyone out. The sample accounts are `alice` / `alice-sample-pw` and `bob` / `bob-sample-pw`.
 
 ### Frontend (React + Vite 6, port 5173)
 
@@ -335,9 +337,23 @@ Open http://localhost:5173/shop. The Vite dev server forwards `/api` requests to
 | 2. Shopping basket: add/remove products, change quantities, see the estimated total at a chosen retailer | `/shop` | `backend/src/routes/basket.js`, `frontend/src/pages/ShopPage.jsx` | `POST /api/basket/quote` |
 | 3. Receipt with a Canadian benchmark: itemized basket, total, each item's Statistics Canada average, and how far the basket is above or below the Canadian average | `/receipt` | `backend/src/routes/basket.js`, `frontend/src/pages/Receipt.jsx` | `POST /api/basket/receipt` |
 | 4. Compare the basket across retailers, with the cheapest store and the lowest price per product highlighted | `/compare` | `backend/src/routes/compare.js`, `frontend/src/pages/ComparisonPage.jsx` | `POST /api/compare` |
-| 5. User accounts (sign up, log in) | — | Tables `User`, `Basket`, `BasketItem` in `db/schema.sql`; queries in `db/test-sample.sql`. The app pages come in Milestone 3. | — |
+| 5. User accounts: sign up (which also creates the user's one basket), log in, log out, delete account | — (pages in progress) | `backend/src/routes/auth.js`, `backend/src/session.js` | `POST /api/register`, `POST /api/login`, `POST /api/logout`, `GET /api/me`, `DELETE /api/account` |
 
 Supporting endpoints: `GET /api/products/filters` (brand and category lists), `GET /api/vendors`, `GET /api/health`.
+
+Every endpoint except `GET /api/health` and the account endpoints below needs a login. A logged-out request gets `401 { "error": "log in or sign up to <feature>", "loginRequired": true }`, for example `log in or sign up to compare prices across stores`; the `api.js` wrappers throw an error with `err.loginRequired` set, so a page can show the message and send the visitor to log in.
+
+The account endpoints take and return JSON, and the login is a session cookie the browser sends by itself:
+
+| Endpoint | Body | Success | Errors |
+|---|---|---|---|
+| `POST /api/register` | `{ "username", "password" }` | `201 { "user": { "uid", "username" } }`, logged in | `400` invalid username (3–50 letters, digits, `.`, `-`, `_`) or password (8–72 characters), `409` username taken |
+| `POST /api/login` | `{ "username", "password" }` | `200 { "user": { "uid", "username" } }` | `401` wrong username or password |
+| `POST /api/logout` | — | `204` | — |
+| `GET /api/me` | — | `200 { "user": { "uid", "username" } }`, or `{ "user": null }` when logged out | — |
+| `DELETE /api/account` | `{ "password" }` | `204`, logged out; the basket and its items are deleted too | `400` no password, `401` not logged in or wrong password |
+
+Usernames are case-insensitive (`Alice` and `alice` are the same account). `frontend/src/api.js` has a wrapper for each endpoint.
 
 E/R Diagram:
 
