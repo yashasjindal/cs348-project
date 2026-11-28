@@ -6,9 +6,16 @@ import { pool } from './db.js';
 // Sessions live in memory: restarting the server logs everyone out, which is fine for local use.
 export const SESSION_COOKIE = 'smartcart.sid';
 
+// Anyone who knows the secret can forge a login cookie, so the fixed fallback is only for local
+// development; a production server refuses to start without its own SESSION_SECRET.
+const secret = process.env.SESSION_SECRET?.trim();
+if (!secret && process.env.NODE_ENV === 'production') {
+  throw new Error('SESSION_SECRET must be set when NODE_ENV=production');
+}
+
 export const sessionMiddleware = session({
   name: SESSION_COOKIE,
-  secret: process.env.SESSION_SECRET ?? 'smartcart-dev-secret',
+  secret: secret || 'smartcart-dev-secret',
   resave: false,
   saveUninitialized: false,  // no cookie until someone logs in
   cookie: { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 },
